@@ -1,0 +1,8 @@
+cd d:/codeing/python/health && .venv\Scripts\activate && python -m streamlit run app.py --server.headless true --server.port 8501
+
+
+cd d:/codeing/python/health && .venv\Scripts\activate && python -m streamlit run app.py
+
+
+
+.\.venv\Scripts\python.exe -m streamlit run app.py
