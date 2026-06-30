@@ -1,0 +1,9 @@
+cd d:/codeing/python/health-react/backend && .venv\Scripts\activate && python -m uvicorn api.main:app
+
+
+
+cd d:/codeing/python/health-react/frontend && pnpm -s run dev
+
+or
+
+cd d:/codeing/python/health-react/frontend && npm run dev
