@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import GlassCard from '../components/GlassCard';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -24,90 +24,96 @@ import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { Search, Plus, Edit, Trash2, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { usersService } from '../services/api';
+
 const UserManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      username: 'admin',
-      name: 'Admin User',
-      email: 'admin@health.com',
-      role: 'admin',
-      status: 'active',
-      lastLogin: '2026-06-22'
-    },
-    {
-      id: 2,
-      username: 'dr.smith',
-      name: 'Dr. John Smith',
-      email: 'john.smith@health.com',
-      role: 'doctor',
-      status: 'active',
-      lastLogin: '2026-06-21'
-    },
-    {
-      id: 3,
-      username: 'dr.johnson',
-      name: 'Dr. Sarah Johnson',
-      email: 'sarah.johnson@health.com',
-      role: 'doctor',
-      status: 'active',
-      lastLogin: '2026-06-20'
-    },
-    {
-      id: 4,
-      username: 'nurse.williams',
-      name: 'Emily Williams',
-      email: 'emily.williams@health.com',
-      role: 'nurse',
-      status: 'active',
-      lastLogin: '2026-06-22'
-    },
-    {
-      id: 5,
-      username: 'staff.brown',
-      name: 'Michael Brown',
-      email: 'michael.brown@health.com',
-      role: 'staff',
-      status: 'inactive',
-      lastLogin: '2026-06-15'
-    }
-  ]);
+  // Backend model: { id, username, role }
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     username: '',
-    name: '',
-    email: '',
-    role: 'staff',
-    status: 'active',
-    password: ''
+    role: 'User',
+    password: '',
   });
 
-  const handleEdit = (user) => {
-    setSelectedUser(user);
-    setFormData({ ...user, password: '' });
-    setIsDialogOpen(true);
-  };
-
-  const handleDelete = (id) => {
-    setUsers(users.filter(u => u.id !== id));
-    toast.success('User deleted successfully');
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (selectedUser) {
-      setUsers(users.map(u => u.id === selectedUser.id ? { ...formData, id: u.id, lastLogin: u.lastLogin } : u));
-      toast.success('User updated successfully');
-    } else {
-      setUsers([...users, { ...formData, id: Date.now(), lastLogin: new Date().toISOString().split('T')[0] }]);
-      toast.success('User created successfully');
+  const loadUsers = async () => {
+    setIsLoading(true);
+    try {
+      const resp = await usersService.getAll();
+      // Backend returns: [{id, username, role}]
+      const mapped = (resp || []).map((u) => ({
+        id: u.id,
+        username: u.username,
+        name: u.username, // UI expects name/email/status/lastLogin; backend doesn't provide them.
+        email: '',
+        role: u.role,
+        status: 'active',
+        lastLogin: '',
+      }));
+      setUsers(mapped);
+    } catch (e) {
+      console.error('Failed to load users', e);
+      toast.error('Failed to load users');
+    } finally {
+      setIsLoading(false);
     }
-    handleCloseDialog();
   };
+
+  useEffect(() => {
+    loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
+
+  const handleEdit = (user) => {
+    // TODO: Backend update endpoint for /admin/users is not implemented in this repo.
+    toast.error('Edit not implemented (missing backend endpoint)');
+    console.warn('Edit TODO: backend update endpoint not implemented');
+  };
+
+  const handleDelete = async (id) => {
+    // TODO: Backend does not expose admin DELETE /admin/users in this repo.
+    // Keep action disabled until the endpoint exists.
+    toast.error('Delete not implemented (missing backend endpoint)');
+    console.warn('Delete TODO: backend DELETE /admin/users not implemented');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (selectedUser) {
+        // TODO: Backend does not expose admin update in this repo.
+        // Keep UI action disabled until endpoint exists.
+        toast.error('Edit not implemented (missing backend endpoint)');
+        console.warn('Edit TODO: backend update endpoint not implemented');
+        return;
+      }
+
+      // POST /admin/users expects: { username, password, role }
+      const payload = {
+        username: (formData.username || '').trim(),
+        password: formData.password,
+        role: formData.role,
+      };
+
+      await usersService.create(payload);
+      toast.success('User created successfully');
+
+      // Refresh from backend so user persists after F5
+      await loadUsers();
+      handleCloseDialog();
+    } catch (err) {
+      console.error('Create user failed', err);
+      toast.error('Failed to create user');
+    }
+  };
+
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);

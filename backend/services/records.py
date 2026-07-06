@@ -13,14 +13,25 @@ def list_records(get_user_ids, search: str = "", sort: str = "record_date desc",
         from_date = filters.get("from_date")
         to_date = filters.get("to_date")
 
-        q = select(HealthRecord).where(HealthRecord.user_id.in_(get_user_ids))
+        # Get the list of user IDs
+        user_ids = get_user_ids()
+
+        q = select(HealthRecord).where(
+            HealthRecord.user_id.in_(user_ids)
+        )
 
         if search:
             like = f"%{search}%"
-            q = q.where(or_(HealthRecord.food.ilike(like), HealthRecord.exercise.ilike(like)))
+            q = q.where(
+                or_(
+                    HealthRecord.food.ilike(like),
+                    HealthRecord.exercise.ilike(like),
+                )
+            )
 
         if from_date:
             q = q.where(HealthRecord.record_date >= str(from_date))
+
         if to_date:
             q = q.where(HealthRecord.record_date <= str(to_date))
 
@@ -30,6 +41,7 @@ def list_records(get_user_ids, search: str = "", sort: str = "record_date desc",
             q = q.order_by(desc(HealthRecord.record_date))
 
         rows = session.execute(q).scalars().all()
+
         return [
             {
                 "id": r.id,
@@ -46,6 +58,7 @@ def list_records(get_user_ids, search: str = "", sort: str = "record_date desc",
             }
             for r in rows
         ]
+
     finally:
         session.close()
 
@@ -72,9 +85,11 @@ def create_record_from_form(rec: dict):
             exercise=rec.get("exercise"),
             created_by_user_id=rec.get("created_by_user_id"),
         )
+
         session.add(record)
         session.commit()
+
         return record.id
+
     finally:
         session.close()
-

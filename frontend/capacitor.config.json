@@ -1,0 +1,8 @@
+{
+  "appId": "com.kenai.health",
+  "appName": "Health Management",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "http"
+  }
+}

@@ -67,6 +67,33 @@ def register(req: RegisterRequest):
 @router.post("/login", response_model=TokenResponse)
 
 def login(req: LoginRequest):
+    import os
+    from db.session import DB_PATH, engine
+    from auth.auth_service import verify_password
+    from db.session import get_db_session as _get_db_session
+    from db.models import User
+    from sqlalchemy import select
+
+    print("===== POST /auth/login Request Debug =====")
+    print("CWD:", os.getcwd())
+    print("HEALTH_DB_PATH:", os.environ.get("HEALTH_DB_PATH"))
+    print("Resolved DB_PATH:", DB_PATH)
+    print("Engine URL:", engine.url)
+    print("Login username:", (req.username or "").strip())
+
+    # Re-check existence + password verify to log result deterministically
+    session = _get_db_session()
+    try:
+        existing = session.execute(select(User).where(User.username == (req.username or "").strip())).scalar_one_or_none()
+        found = existing is not None
+        verify = False
+        if found:
+            verify = verify_password(req.password or "", existing.password_hash)
+        print("User found:", found)
+        print("verify_password():", verify)
+    finally:
+        session.close()
+
     user = authenticate_user(get_db_session, username=req.username, password=req.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
@@ -74,6 +101,7 @@ def login(req: LoginRequest):
     access = create_access_token(user_id=user["id"])
     refresh = create_refresh_token(user_id=user["id"])
     return TokenResponse(access_token=access, refresh_token=refresh)
+
 
 
 @router.post("/refresh", response_model=TokenResponse)

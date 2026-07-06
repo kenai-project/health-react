@@ -35,8 +35,11 @@ async def get_current_user(
 
     try:
         payload = decode_access_token(token)
+        return payload
     except ExpiredSignatureError:
+        print("===== JWT decode_access_token failed: expired =====")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+
 
     user_id = payload.get("sub")
 

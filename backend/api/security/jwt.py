@@ -10,19 +10,23 @@ ACCESS_TOKEN_TTL_MIN = int(os.environ.get("ACCESS_TOKEN_TTL_MIN", "15"))
 REFRESH_TOKEN_TTL_DAYS = int(os.environ.get("REFRESH_TOKEN_TTL_DAYS", "30"))
 
 
+
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
 def create_access_token(*, user_id: int) -> str:
     now = _utcnow()
+    exp_dt = now + timedelta(minutes=ACCESS_TOKEN_TTL_MIN)
     payload = {
         "sub": str(user_id),
         "type": "access",
         "iat": int(now.timestamp()),
-        "exp": int((now + timedelta(minutes=ACCESS_TOKEN_TTL_MIN)).timestamp()),
+        "exp": int(exp_dt.timestamp()),
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
+
+
 
 
 def create_refresh_token(*, user_id: int) -> str:
@@ -41,6 +45,8 @@ def decode_access_token(token: str) -> dict:
     if payload.get("type") != "access":
         raise jwt.InvalidTokenError("Not an access token")
     return payload
+
+
 
 
 def decode_refresh_token(token: str) -> dict:

@@ -20,18 +20,47 @@ export const AuthProvider = ({ children }) => {
     // Check if user is logged in on mount
     const token = localStorage.getItem('access_token');
     const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
+
+    const isTokenExpired = (accessToken) => {
       try {
-        setUser(JSON.parse(userData));
-      } catch (error) {
-        console.error('Error parsing user data:', error);
+        const parts = accessToken.split('.');
+        if (parts.length !== 3) return false;
+        // JWT payload is base64url encoded
+        const payload = JSON.parse(
+          decodeURIComponent(
+            atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+              .split('')
+              .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+              .join('')
+          )
+        );
+        if (!payload?.exp) return false;
+        const nowSec = Math.floor(Date.now() / 1000);
+        return payload.exp <= nowSec;
+      } catch {
+        return false;
+      }
+    };
+
+    if (token) {
+      if (isTokenExpired(token)) {
+        console.warn('AuthContext: stored access_token is expired; clearing localStorage');
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
+      } else if (userData) {
+        try {
+          setUser(JSON.parse(userData));
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user');
+        }
       }
     }
+
     setLoading(false);
   }, []);
+
 
   const login = async (username, password) => {
     try {
@@ -41,10 +70,16 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('access_token', access_token);
 
       // Backend login returns only tokens; fetch user profile after login.
-      const userData = await authService.getCurrentUser();
-
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
+      // If profile fetch fails (but login succeeded), still allow navigation
+      // by treating the presence of a token as authenticated.
+      try {
+        const userData = await authService.getCurrentUser();
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+      } catch (profileError) {
+        console.warn('AuthContext.login: /auth/me failed, continuing with token-only auth:', profileError);
+        setUser({});
+      }
 
       return { success: true };
     } catch (error) {

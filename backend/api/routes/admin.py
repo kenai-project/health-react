@@ -7,7 +7,11 @@ from services.admin import list_users as svc_list_users, create_user, assign_sta
 from services.staff import list_assigned_users
 from services.analytics import get_user_scope_user_ids
 
+import os
+from db.session import DB_PATH, engine
+
 router = APIRouter()
+
 
 
 class UserCreateRequest(BaseModel):
@@ -23,16 +27,48 @@ class AssignStaffRequest(BaseModel):
 
 @router.get("/users", summary="List all users (Admin only)")
 def list_users_endpoint(current_user=Depends(require_role({"Admin"}))):
-    return svc_list_users()
+    print("===== GET /admin/users Request Debug =====")
+    print("CWD:", os.getcwd())
+    print("HEALTH_DB_PATH:", os.environ.get("HEALTH_DB_PATH"))
+    print("Resolved DB_PATH:", DB_PATH)
+    print("Engine URL:", engine.url)
+
+    users_before = svc_list_users()
+    print("User count (GET returned):", len(users_before))
+    if users_before:
+        print("Last username in response:", users_before[-1].get("username"))
+
+    return users_before
+
 
 
 @router.post("/users", summary="Create user (Admin only)")
 def create_user_endpoint(req: UserCreateRequest, current_user=Depends(require_role({"Admin"}))):
+    print("===== POST /admin/users Request Debug =====")
+    print("CWD:", os.getcwd())
+    print("HEALTH_DB_PATH:", os.environ.get("HEALTH_DB_PATH"))
+    print("Resolved DB_PATH:", DB_PATH)
+    print("Engine URL:", engine.url)
+
+    users_before = svc_list_users()
+    print("User count (GET before POST):", len(users_before))
+    if users_before:
+        print("Last username before POST:", users_before[-1].get("username"))
+
+    print("Creating username:", (req.username or "").strip())
+
     try:
         new_id = create_user(req.username, req.password, req.role)
+
+        users_after = svc_list_users()
+        print("User count (after POST):", len(users_after))
+        if users_after:
+            print("Last username after POST:", users_after[-1].get("username"))
+
         return {"id": new_id}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 
 @router.post("/assign", summary="Assign staff to a user (Admin only)")
