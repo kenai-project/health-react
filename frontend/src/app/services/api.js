@@ -3,11 +3,8 @@ import { Capacitor } from '@capacitor/core';
 // API base URL
 // - Android Emulator (Capacitor): http://10.0.2.2:8000
 // - Web browser: use localhost PC (default http://127.0.0.1:8000)
-const API_BASE_URL = import.meta.env.VITE_API_URL || (
-  Capacitor.getPlatform() === 'android'
-    ? 'http://10.0.2.2:8000'
-    : 'http://127.0.0.1:8000'
-);
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://health-react-aoax.onrender.com';
+
 
 
 // NOTE:
