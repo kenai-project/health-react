@@ -7,6 +7,10 @@ from api.routes.admin import router as admin_router
 from api.routes.admin_analytics import router as admin_analytics_router
 from api.routes.exports import router as exports_router
 from db.migrate import create_tables_if_needed
+from db.session import get_db_session
+
+from auth.bootstrap import bootstrap_admin_if_needed
+
 
 
 def create_app() -> FastAPI:
@@ -14,6 +18,10 @@ def create_app() -> FastAPI:
 
     # Create database tables on startup
     create_tables_if_needed()
+
+    # Ensure admin user exists (safe/idempotent)
+    bootstrap_admin_if_needed(get_db_session)
+
 
     app.add_middleware(
         CORSMiddleware,
