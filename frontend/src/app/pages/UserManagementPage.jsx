@@ -99,7 +99,14 @@ const UserManagementPage = () => {
       const payload = {
         username: (formData.username || '').trim(),
         password: formData.password,
-        role: formData.role,
+        role:
+          formData.role === 'admin'
+            ? 'Admin'
+            : formData.role === 'staff'
+              ? 'Staff'
+              : formData.role === 'doctor' || formData.role === 'nurse'
+                ? 'User'
+                : formData.role,
       };
 
       await usersService.create(payload);
