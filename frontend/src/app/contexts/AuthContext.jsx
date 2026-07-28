@@ -77,9 +77,11 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
       } catch (profileError) {
-        console.warn('AuthContext.login: /auth/me failed, continuing with token-only auth:', profileError);
-        setUser({});
+        console.warn('AuthContext.login: /auth/me failed, clearing user to avoid false-auth:', profileError);
+        localStorage.removeItem('user');
+        setUser(null);
       }
+
 
       return { success: true };
     } catch (error) {

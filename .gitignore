@@ -11,5 +11,9 @@ __pycache__/
 **/__pycache__/
 *.pyc
 
+# Environment variables
+.env
+backend/.env
+
 # Database
 *.db

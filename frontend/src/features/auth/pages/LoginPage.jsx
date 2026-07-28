@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../../app/contexts/AuthContext';
 import { useTheme } from '../../../app/contexts/ThemeContext';
@@ -18,9 +18,14 @@ const LoginPage = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (avoid navigation during render)
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/home', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   if (isAuthenticated) {
-    navigate('/home');
     return null;
   }
 

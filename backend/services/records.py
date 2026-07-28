@@ -13,8 +13,9 @@ def list_records(get_user_ids, search: str = "", sort: str = "record_date desc",
         from_date = filters.get("from_date")
         to_date = filters.get("to_date")
 
-        # Get the list of user IDs
-        user_ids = get_user_ids()
+        # get_user_ids can be either a callable or a precomputed list
+        user_ids = get_user_ids() if callable(get_user_ids) else get_user_ids
+
 
         q = select(HealthRecord).where(
             HealthRecord.user_id.in_(user_ids)
