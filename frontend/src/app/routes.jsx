@@ -12,6 +12,7 @@ import ProfilePage from './pages/ProfilePage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SettingsPage from './pages/SettingsPage';
 import StaffRecordsPage from './pages/StaffRecordsPage';
+import LLMAssistantPage from './pages/LLMAssistantPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -45,6 +46,7 @@ export const router = createBrowserRouter(
         { path: 'settings', element: <SettingsPage /> },
         { path: 'admin/users', element: <UserManagementPage /> },
         { path: 'staff/records', element: <StaffRecordsPage /> },
+        { path: 'llm', element: <LLMAssistantPage /> },
       ],
     },
     {

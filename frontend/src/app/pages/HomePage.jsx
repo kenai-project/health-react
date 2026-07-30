@@ -10,7 +10,8 @@ import {
   LogOut,
   ArrowRight,
   Activity,
-  Clock
+  Clock,
+  Bot
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 
@@ -53,6 +54,13 @@ const HomePage = () => {
       icon: UserCircle,
       path: '/profile',
       color: 'from-indigo-500 to-indigo-600'
+    },
+    {
+      title: 'AI Assistant',
+      description: 'Chat with your AI health assistant',
+      icon: Bot,
+      path: '/llm',
+      color: 'from-teal-500 to-cyan-600'
     }
   ];
 

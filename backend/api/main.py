@@ -6,6 +6,7 @@ from api.routes.records import router as records_router
 from api.routes.admin import router as admin_router
 from api.routes.admin_analytics import router as admin_analytics_router
 from api.routes.exports import router as exports_router
+from api.routes.llm import router as llm_router
 from db.migrate import create_tables_if_needed
 from db.session import get_db_session
 
@@ -42,6 +43,7 @@ def create_app() -> FastAPI:
         tags=["admin-analytics"],
     )
     app.include_router(exports_router, prefix="/exports", tags=["exports"])
+    app.include_router(llm_router, prefix="/llm", tags=["llm"])
 
     return app
 

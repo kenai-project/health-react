@@ -186,3 +186,34 @@ export const settingsService = {
     });
   }
 };
+
+// LLM API
+export const llmService = {
+  checkHealth: async () => {
+    return fetchAPI('/llm/health');
+  },
+
+  chat: async (message, history = []) => {
+    return fetchAPI('/llm/chat', {
+      method: 'POST',
+      headers: getJsonHeaders(),
+      body: JSON.stringify({ message, history })
+    });
+  },
+
+  analyze: async (limit = 10) => {
+    return fetchAPI('/llm/analyze', {
+      method: 'POST',
+      headers: getJsonHeaders(),
+      body: JSON.stringify({ limit })
+    });
+  },
+
+  suggestions: async (limit = 10) => {
+    return fetchAPI('/llm/suggestions', {
+      method: 'POST',
+      headers: getJsonHeaders(),
+      body: JSON.stringify({ limit })
+    });
+  }
+};

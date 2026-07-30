@@ -31,13 +31,15 @@ async def get_current_user(
 
     # Token verification is implemented in auth dependency module.
     from api.security.jwt import decode_access_token
-    from jwt import ExpiredSignatureError
+    from jwt import ExpiredSignatureError, InvalidTokenError
 
     try:
         payload = decode_access_token(token)
     except ExpiredSignatureError:
         print("===== JWT decode_access_token failed: expired =====")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
+    except InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid access token")
 
     user_id = payload.get("sub")
 

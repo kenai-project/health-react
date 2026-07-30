@@ -7,6 +7,7 @@ import {
   Users, 
   UserCircle, 
   Settings,
+  Bot,
   X
 } from 'lucide-react';
 import { cn } from './ui/utils';
@@ -19,7 +20,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
     { name: 'User Management', href: '/admin/users', icon: Users },
     { name: 'Profile', href: '/profile', icon: UserCircle },
-    { name: 'Settings', href: '/settings', icon: Settings }
+    { name: 'Settings', href: '/settings', icon: Settings },
+    { name: 'AI Assistant', href: '/llm', icon: Bot },
   ];
 
   return (
