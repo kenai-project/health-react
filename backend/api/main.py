@@ -7,6 +7,8 @@ from api.routes.admin import router as admin_router
 from api.routes.admin_analytics import router as admin_analytics_router
 from api.routes.exports import router as exports_router
 from api.routes.llm import router as llm_router
+from api.routes.documents import router as documents_router
+from api.routes.analyses import router as analyses_router
 from db.migrate import create_tables_if_needed
 from db.session import get_db_session
 
@@ -44,6 +46,8 @@ def create_app() -> FastAPI:
     )
     app.include_router(exports_router, prefix="/exports", tags=["exports"])
     app.include_router(llm_router, prefix="/llm", tags=["llm"])
+    app.include_router(documents_router, prefix="/api/v1", tags=["documents"])
+    app.include_router(analyses_router, prefix="/api/v1/documents", tags=["analyses"])
 
     return app
 

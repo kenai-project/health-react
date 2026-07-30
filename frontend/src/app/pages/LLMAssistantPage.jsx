@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import GlassCard from '../components/GlassCard';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -14,6 +14,9 @@ import {
   XCircle,
 } from 'lucide-react';
 import { llmService } from '../services/api';
+import VoiceButton from '../../features/voice/components/VoiceButton';
+import AutoSpeakToggle from '../../features/voice/components/AutoSpeakToggle';
+import useSpeechSynthesis from '../../features/voice/hooks/useSpeechSynthesis';
 
 const LLMAssistantPage = () => {
   // Health status
@@ -36,6 +39,56 @@ const LLMAssistantPage = () => {
 
   // Disclaimer
   const [disclaimer, setDisclaimer] = useState('');
+
+  // Voice — auto-speak state (persisted in localStorage)
+  const [autoSpeakEnabled, setAutoSpeakEnabled] = useState(() => {
+    return localStorage.getItem('autoSpeak') === 'true';
+  });
+
+  const { speak, cancel: cancelSpeech, isSpeaking } = useSpeechSynthesis({
+    rate: 1.0,
+    pitch: 1.0,
+  });
+
+  const handleAutoSpeakToggle = useCallback((enabled) => {
+    setAutoSpeakEnabled(enabled);
+    localStorage.setItem('autoSpeak', enabled ? 'true' : 'false');
+  }, []);
+
+  // Voice transcript handler — fills input and auto-sends
+  const handleVoiceTranscript = useCallback((transcript) => {
+    if (!transcript.trim()) return;
+    setChatInput(transcript);
+    // Auto-send after a brief delay so user sees the text
+    setTimeout(() => {
+      if (transcript.trim()) {
+        // We need to trigger send with the transcript directly
+        // since setChatInput is async
+        setChatInput('');
+        const userMessage = { role: 'user', content: transcript.trim() };
+        setMessages((prev) => [...prev, userMessage]);
+        setChatLoading(true);
+        llmService.chat(transcript.trim(), messages)
+          .then((response) => {
+            const assistantMessage = { role: 'assistant', content: response.reply };
+            setMessages((prev) => [...prev, assistantMessage]);
+            if (response.disclaimer) {
+              setDisclaimer(response.disclaimer);
+            }
+            if (autoSpeakEnabled && response.reply) {
+              speak(response.reply);
+            }
+          })
+          .catch((error) => {
+            const errorMsg = error.response?.data?.detail || 'Failed to send message';
+            toast.error(errorMsg);
+          })
+          .finally(() => {
+            setChatLoading(false);
+          });
+      }
+    }, 300);
+  }, [messages, autoSpeakEnabled, speak]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -73,6 +126,11 @@ const LLMAssistantPage = () => {
     const message = chatInput.trim();
     setChatInput('');
 
+    // Cancel any ongoing speech when user sends a new message
+    if (isSpeaking) {
+      cancelSpeech();
+    }
+
     // Add user message to UI
     const userMessage = { role: 'user', content: message };
     setMessages((prev) => [...prev, userMessage]);
@@ -85,6 +143,10 @@ const LLMAssistantPage = () => {
       setMessages((prev) => [...prev, assistantMessage]);
       if (response.disclaimer) {
         setDisclaimer(response.disclaimer);
+      }
+      // Auto-speak the response if enabled
+      if (autoSpeakEnabled && response.reply) {
+        speak(response.reply);
       }
     } catch (error) {
       const errorMsg =
@@ -208,9 +270,17 @@ const LLMAssistantPage = () => {
         {/* Chat Section */}
         <div className="lg:col-span-2">
           <GlassCard className="p-6 flex flex-col h-[500px]">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-              Chat with AI Assistant
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                Chat with AI Assistant
+              </h3>
+              <AutoSpeakToggle
+                enabled={autoSpeakEnabled}
+                onToggle={handleAutoSpeakToggle}
+                isSpeaking={isSpeaking}
+                onStop={cancelSpeech}
+              />
+            </div>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto space-y-4 mb-4">
@@ -247,9 +317,14 @@ const LLMAssistantPage = () => {
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type your message..."
+                placeholder="Type your message or click the mic to speak..."
                 disabled={chatLoading}
                 className="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
+              />
+              <VoiceButton
+                onTranscript={handleVoiceTranscript}
+                disabled={chatLoading}
+                size="md"
               />
               <Button
                 onClick={handleSendMessage}

@@ -72,6 +72,82 @@ const fetchAPI = async (endpoint, options = {}) => {
 };
 
 
+// SSE Streaming helper
+const _streamAnalysis = async (endpoint, body, onEvent, signal) => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const headers = getAuthHeaders();
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+    signal,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Request failed' }));
+    throw { response: { data: error, status: response.status } };
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // Process complete SSE events (delimited by \n\n)
+      let eventEnd;
+      while ((eventEnd = buffer.indexOf('\n\n')) !== -1) {
+        const eventData = buffer.slice(0, eventEnd);
+        buffer = buffer.slice(eventEnd + 2);
+
+        // Parse SSE event
+        const lines = eventData.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const jsonStr = line.slice(6);
+            try {
+              const event = JSON.parse(jsonStr);
+              onEvent(event);
+            } catch (e) {
+              console.error('Failed to parse SSE event:', e);
+            }
+          }
+        }
+      }
+    }
+
+    // Process any remaining data in buffer
+    if (buffer.trim()) {
+      const lines = buffer.split('\n');
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const jsonStr = line.slice(6);
+          try {
+            const event = JSON.parse(jsonStr);
+            onEvent(event);
+          } catch (e) {
+            console.error('Failed to parse SSE event:', e);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      return;
+    }
+    onEvent({ type: 'error', message: error.message || 'Stream failed' });
+  } finally {
+    reader.releaseLock();
+  }
+};
+
+
 // Auth API
 export const authService = {
   login: async (username, password) => {
@@ -215,5 +291,102 @@ export const llmService = {
       headers: getJsonHeaders(),
       body: JSON.stringify({ limit })
     });
+  }
+};
+
+// Documents API
+export const documentService = {
+  upload: async (files, onProgress) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const formData = new FormData();
+      files.forEach(f => formData.append('files', f));
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total);
+      };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText));
+        else reject(new Error(xhr.responseText || 'Upload failed'));
+      };
+      xhr.onerror = () => reject(new Error('Upload failed'));
+      xhr.open('POST', `${API_BASE_URL}/api/v1/documents/upload`);
+      xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('access_token')}`);
+      xhr.send(formData);
+    });
+  },
+
+  extract: async (documentId) => {
+    return fetchAPI('/api/v1/documents/extract', {
+      method: 'POST',
+      headers: getJsonHeaders(),
+      body: JSON.stringify({ document_id: documentId })
+    });
+  },
+
+  list: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return fetchAPI(`/api/v1/documents${queryString ? `?${queryString}` : ''}`);
+  },
+
+  get: async (id) => {
+    return fetchAPI(`/api/v1/documents/${id}`);
+  },
+
+  delete: async (id) => {
+    return fetchAPI(`/api/v1/documents/${id}`, { method: 'DELETE' });
+  },
+
+  // Analysis API
+  generateSummary: async (documentId) => {
+    return fetchAPI(`/api/v1/documents/${documentId}/summary`, {
+      method: 'POST',
+      headers: getJsonHeaders(),
+    });
+  },
+
+  generateExplanation: async (documentId) => {
+    return fetchAPI(`/api/v1/documents/${documentId}/explanation`, {
+      method: 'POST',
+      headers: getJsonHeaders(),
+    });
+  },
+
+  askQuestion: async (documentId, question) => {
+    return fetchAPI(`/api/v1/documents/${documentId}/question`, {
+      method: 'POST',
+      headers: getJsonHeaders(),
+      body: JSON.stringify({ question })
+    });
+  },
+
+  getAnalyses: async (documentId, params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return fetchAPI(`/api/v1/documents/${documentId}/analyses${queryString ? `?${queryString}` : ''}`);
+  },
+
+  deleteAnalysis: async (documentId, analysisId) => {
+    return fetchAPI(`/api/v1/documents/${documentId}/analyses/${analysisId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  regenerateAnalysis: async (documentId, analysisId) => {
+    return fetchAPI(`/api/v1/documents/${documentId}/analyses/${analysisId}/regenerate`, {
+      method: 'POST',
+      headers: getJsonHeaders(),
+    });
+  },
+
+  // Streaming Analysis API (SSE)
+  generateSummaryStream: (documentId, onEvent, signal) => {
+    return _streamAnalysis(`/api/v1/documents/${documentId}/summary/stream`, null, onEvent, signal);
+  },
+
+  generateExplanationStream: (documentId, onEvent, signal) => {
+    return _streamAnalysis(`/api/v1/documents/${documentId}/explanation/stream`, null, onEvent, signal);
+  },
+
+  askQuestionStream: (documentId, question, onEvent, signal) => {
+    return _streamAnalysis(`/api/v1/documents/${documentId}/question/stream`, { question }, onEvent, signal);
   }
 };

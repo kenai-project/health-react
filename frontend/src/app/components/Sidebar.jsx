@@ -17,6 +17,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Home', href: '/home', icon: Home },
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Records', href: '/records', icon: FileText },
+    { name: 'Documents', href: '/documents', icon: FileText },
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
     { name: 'User Management', href: '/admin/users', icon: Users },
     { name: 'Profile', href: '/profile', icon: UserCircle },

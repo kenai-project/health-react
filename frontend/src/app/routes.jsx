@@ -15,6 +15,7 @@ import StaffRecordsPage from './pages/StaffRecordsPage';
 import LLMAssistantPage from './pages/LLMAssistantPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import DocumentsPage from '@/features/documents/pages/DocumentsPage';
 
 export const router = createBrowserRouter(
   [
@@ -47,6 +48,7 @@ export const router = createBrowserRouter(
         { path: 'admin/users', element: <UserManagementPage /> },
         { path: 'staff/records', element: <StaffRecordsPage /> },
         { path: 'llm', element: <LLMAssistantPage /> },
+        { path: 'documents', element: <DocumentsPage /> },
       ],
     },
     {

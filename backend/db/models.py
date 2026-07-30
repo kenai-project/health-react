@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, Date, Float, ForeignKey, UniqueConstraint
+from sqlalchemy import Integer, String, Date, Float, ForeignKey, UniqueConstraint, Text, Boolean, Index
 
 Base = declarative_base()
 
@@ -46,3 +46,62 @@ class HealthRecord(Base):
 
     user = relationship("User", back_populates="records")
 
+
+class Document(Base):
+    __tablename__ = "documents"
+    __table_args__ = (
+        Index("idx_documents_user_status", "user_id", "status"),
+        Index("idx_documents_checksum", "checksum"),
+        Index("idx_documents_updated", "updated_at"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+
+    # File identity
+    original_filename: Mapped[str] = mapped_column(String(500), nullable=False)
+    stored_filename: Mapped[str] = mapped_column(String(500), nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    file_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    checksum: Mapped[str] = mapped_column(String(64), nullable=False)  # SHA-256
+    version: Mapped[int] = mapped_column(Integer, default=1)
+
+    # Timestamps
+    upload_time: Mapped[str] = mapped_column(String(30), nullable=False)
+    created_at: Mapped[str] = mapped_column(String(30), nullable=False)
+    updated_at: Mapped[str] = mapped_column(String(30), nullable=False)
+    last_accessed: Mapped[str] = mapped_column(String(30), nullable=True)
+
+    # Parsing
+    parser_used: Mapped[str] = mapped_column(String(50), nullable=True)
+    processing_time_ms: Mapped[float] = mapped_column(Float, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="UPLOADED")
+
+    # Content
+    extracted_text: Mapped[str] = mapped_column(Text, nullable=True)
+    text_chunks: Mapped[str] = mapped_column(Text, nullable=True)
+    doc_metadata: Mapped[str] = mapped_column(Text, nullable=True)
+
+    # Error
+    error_code: Mapped[str] = mapped_column(String(50), nullable=True)
+    error_message: Mapped[str] = mapped_column(String(500), nullable=True)
+
+    # Relationships
+    user = relationship("User", backref="documents")
+    analyses = relationship("DocumentAnalysis", back_populates="document", cascade="all, delete-orphan")
+
+
+class DocumentAnalysis(Base):
+    __tablename__ = "document_analyses"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    document_id: Mapped[int] = mapped_column(Integer, ForeignKey("documents.id"), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    type: Mapped[str] = mapped_column(String(20), nullable=False)  # AnalysisType enum value
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    llm_model: Mapped[str] = mapped_column(String(100), nullable=False)
+    prompt_hash: Mapped[str] = mapped_column(String(64), nullable=True)
+    citations: Mapped[str] = mapped_column(Text, nullable=True)
+    generated_at: Mapped[str] = mapped_column(String(30), nullable=False)
+
+    document = relationship("Document", back_populates="analyses")
