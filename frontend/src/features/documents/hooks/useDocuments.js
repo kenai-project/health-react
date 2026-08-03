@@ -75,9 +75,18 @@ export function useDocuments() {
       setUploadProgress(progressMap);
 
       // Upload
-      const result = await documentService.upload(files, (loaded, total) => {
-        const progress = total > 0 ? (loaded / total) * 100 : 0;
-        setUploadProgress(prev => ({ ...prev, [index]: progress }));
+      // NOTE: documentService.upload calls onProgress(ratio) with a single
+      // ratio argument (0..1) for the whole batch, so there is no per-file
+      // index in scope here. Update every tracked file's progress together.
+      const result = await documentService.upload(files, (ratio) => {
+        const progress = Math.min(100, Math.max(0, ratio * 100));
+        setUploadProgress(prev => {
+          const next = {};
+          Object.keys(prev).forEach(key => {
+            next[key] = progress;
+          });
+          return next;
+        });
       });
 
       // Replace optimistic docs with real ones
