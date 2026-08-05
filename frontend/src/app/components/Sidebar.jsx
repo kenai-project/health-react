@@ -11,18 +11,20 @@ import {
   X
 } from 'lucide-react';
 import { cn } from './ui/utils';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const Sidebar = ({ isOpen, onClose }) => {
+  const { t } = useLanguage();
   const navigation = [
-    { name: 'Home', href: '/home', icon: Home },
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Records', href: '/records', icon: FileText },
-    { name: 'Documents', href: '/documents', icon: FileText },
-    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-    { name: 'User Management', href: '/admin/users', icon: Users },
-    { name: 'Profile', href: '/profile', icon: UserCircle },
-    { name: 'Settings', href: '/settings', icon: Settings },
-    { name: 'AI Assistant', href: '/llm', icon: Bot },
+    { name: t('sidebar.home'), href: '/home', icon: Home },
+    { name: t('sidebar.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { name: t('sidebar.records'), href: '/records', icon: FileText },
+    { name: t('sidebar.documents'), href: '/documents', icon: FileText },
+    { name: t('sidebar.analytics'), href: '/analytics', icon: BarChart3 },
+    { name: t('sidebar.userManagement'), href: '/admin/users', icon: Users },
+    { name: t('sidebar.profile'), href: '/profile', icon: UserCircle },
+    { name: t('sidebar.settings'), href: '/settings', icon: Settings },
+    { name: t('sidebar.aiAssistant'), href: '/llm', icon: Bot },
   ];
 
   return (
@@ -51,8 +53,8 @@ const Sidebar = ({ isOpen, onClose }) => {
                 <span className="text-white font-bold text-xl">H</span>
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">Health</h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Management</p>
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white">{t('sidebar.brand')}</h1>
+                <p className="text-xs text-gray-600 dark:text-gray-400">{t('sidebar.brandSub')}</p>
               </div>
             </div>
             <button
@@ -93,7 +95,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           {/* Footer */}
           <div className="px-6 py-4 border-t border-gray-200/50 dark:border-gray-700/50">
             <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-              © 2026 Health Management
+              {t('sidebar.footer')}
             </p>
           </div>
         </div>

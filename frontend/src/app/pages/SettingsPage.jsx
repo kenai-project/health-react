@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import GlassCard from '../components/GlassCard';
 import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
 import { Switch } from '../components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Settings as SettingsIcon, Bell, Shield, Database, Moon, Sun, Save } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Shield, Database, Moon, Sun, Save, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SettingsPage = () => {
   const { theme, toggleTheme } = useTheme();
+  const { t, language, languages, changeLanguage } = useLanguage();
   
   const [notifications, setNotifications] = useState({
     emailNotifications: true,
@@ -47,25 +49,29 @@ const SettingsPage = () => {
   };
 
   const handleSaveSettings = () => {
-    toast.success('Settings saved successfully');
+    toast.success(t('settings.saved'));
+  };
+
+  const handleLanguageChange = (e) => {
+    changeLanguage(e.target.value);
   };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('settings.title')}</h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Manage your application preferences
+          {t('settings.subtitle')}
         </p>
       </div>
 
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="grid w-full grid-cols-4 backdrop-blur-md bg-white/70 dark:bg-gray-800/70">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="privacy">Privacy</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
+          <TabsTrigger value="general">{t('settings.general')}</TabsTrigger>
+          <TabsTrigger value="notifications">{t('settings.notifications')}</TabsTrigger>
+          <TabsTrigger value="privacy">{t('settings.privacy')}</TabsTrigger>
+          <TabsTrigger value="system">{t('settings.system')}</TabsTrigger>
         </TabsList>
 
         {/* General Settings */}
@@ -74,7 +80,7 @@ const SettingsPage = () => {
             <div className="flex items-center gap-3 mb-6">
               <SettingsIcon className="w-6 h-6 text-blue-500" />
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                General Settings
+                {t('settings.generalSettings')}
               </h3>
             </div>
 
@@ -88,9 +94,9 @@ const SettingsPage = () => {
                     <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                   )}
                   <div>
-                    <Label className="text-gray-900 dark:text-white">Dark Mode</Label>
+                    <Label className="text-gray-900 dark:text-white">{t('settings.darkMode')}</Label>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Switch between light and dark theme
+                      {t('settings.darkModeDesc')}
                     </p>
                   </div>
                 </div>
@@ -99,21 +105,30 @@ const SettingsPage = () => {
 
               {/* Language */}
               <div className="space-y-2">
-                <Label htmlFor="language">Language</Label>
+                <Label htmlFor="language" className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-gray-500" />
+                  {t('settings.language')}
+                </Label>
                 <select
                   id="language"
+                  value={language}
+                  onChange={handleLanguageChange}
                   className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
-                  <option value="en">English</option>
-                  <option value="es">Spanish</option>
-                  <option value="fr">French</option>
-                  <option value="de">German</option>
+                  {Object.entries(languages).map(([code, { label, flag }]) => (
+                    <option key={code} value={code}>
+                      {flag} {label}
+                    </option>
+                  ))}
                 </select>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {t('languagePopup.subtitle')}
+                </p>
               </div>
 
               {/* Timezone */}
               <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
+                <Label htmlFor="timezone">{t('settings.timezone')}</Label>
                 <select
                   id="timezone"
                   className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
@@ -128,7 +143,7 @@ const SettingsPage = () => {
 
               {/* Date Format */}
               <div className="space-y-2">
-                <Label htmlFor="dateFormat">Date Format</Label>
+                <Label htmlFor="dateFormat">{t('settings.dateFormat')}</Label>
                 <select
                   id="dateFormat"
                   className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
@@ -146,7 +161,7 @@ const SettingsPage = () => {
                 className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
               >
                 <Save className="w-4 h-4 mr-2" />
-                Save Changes
+                {t('common.save')}
               </Button>
             </div>
           </GlassCard>
@@ -158,16 +173,16 @@ const SettingsPage = () => {
             <div className="flex items-center gap-3 mb-6">
               <Bell className="w-6 h-6 text-blue-500" />
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Notification Preferences
+                {t('settings.notificationPrefs')}
               </h3>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50">
                 <div>
-                  <Label className="text-gray-900 dark:text-white">Email Notifications</Label>
+                  <Label className="text-gray-900 dark:text-white">{t('settings.emailNotifications')}</Label>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Receive notifications via email
+                    {t('settings.emailNotificationsDesc')}
                   </p>
                 </div>
                 <Switch
@@ -178,9 +193,9 @@ const SettingsPage = () => {
 
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50">
                 <div>
-                  <Label className="text-gray-900 dark:text-white">Push Notifications</Label>
+                  <Label className="text-gray-900 dark:text-white">{t('settings.pushNotifications')}</Label>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Receive push notifications in browser
+                    {t('settings.pushNotificationsDesc')}
                   </p>
                 </div>
                 <Switch
@@ -191,9 +206,9 @@ const SettingsPage = () => {
 
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50">
                 <div>
-                  <Label className="text-gray-900 dark:text-white">SMS Notifications</Label>
+                  <Label className="text-gray-900 dark:text-white">{t('settings.smsNotifications')}</Label>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Receive notifications via SMS
+                    {t('settings.smsNotificationsDesc')}
                   </p>
                 </div>
                 <Switch
@@ -204,9 +219,9 @@ const SettingsPage = () => {
 
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50">
                 <div>
-                  <Label className="text-gray-900 dark:text-white">Appointment Reminders</Label>
+                  <Label className="text-gray-900 dark:text-white">{t('settings.appointmentReminders')}</Label>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Get reminders for upcoming appointments
+                    {t('settings.appointmentRemindersDesc')}
                   </p>
                 </div>
                 <Switch
@@ -217,9 +232,9 @@ const SettingsPage = () => {
 
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50">
                 <div>
-                  <Label className="text-gray-900 dark:text-white">System Updates</Label>
+                  <Label className="text-gray-900 dark:text-white">{t('settings.systemUpdates')}</Label>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Receive notifications about system updates
+                    {t('settings.systemUpdatesDesc')}
                   </p>
                 </div>
                 <Switch
@@ -230,9 +245,9 @@ const SettingsPage = () => {
 
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50">
                 <div>
-                  <Label className="text-gray-900 dark:text-white">Marketing Emails</Label>
+                  <Label className="text-gray-900 dark:text-white">{t('settings.marketingEmails')}</Label>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Receive marketing and promotional emails
+                    {t('settings.marketingEmailsDesc')}
                   </p>
                 </div>
                 <Switch
@@ -248,7 +263,7 @@ const SettingsPage = () => {
                 className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
               >
                 <Save className="w-4 h-4 mr-2" />
-                Save Changes
+                {t('common.save')}
               </Button>
             </div>
           </GlassCard>
@@ -260,30 +275,30 @@ const SettingsPage = () => {
             <div className="flex items-center gap-3 mb-6">
               <Shield className="w-6 h-6 text-blue-500" />
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Privacy & Security
+                {t('settings.privacySecurity')}
               </h3>
             </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="profileVisibility">Profile Visibility</Label>
+                <Label htmlFor="profileVisibility">{t('settings.profileVisibility')}</Label>
                 <select
                   id="profileVisibility"
                   value={privacy.profileVisibility}
                   onChange={(e) => setPrivacy({ ...privacy, profileVisibility: e.target.value })}
                   className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
-                  <option value="public">Public</option>
-                  <option value="private">Private</option>
-                  <option value="team">Team Only</option>
+                  <option value="public">{t('settings.visibilityPublic')}</option>
+                  <option value="private">{t('settings.visibilityPrivate')}</option>
+                  <option value="team">{t('settings.visibilityTeam')}</option>
                 </select>
               </div>
 
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50">
                 <div>
-                  <Label className="text-gray-900 dark:text-white">Show Email Address</Label>
+                  <Label className="text-gray-900 dark:text-white">{t('settings.showEmail')}</Label>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Make your email visible to other users
+                    {t('settings.showEmailDesc')}
                   </p>
                 </div>
                 <Switch
@@ -294,9 +309,9 @@ const SettingsPage = () => {
 
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50">
                 <div>
-                  <Label className="text-gray-900 dark:text-white">Show Phone Number</Label>
+                  <Label className="text-gray-900 dark:text-white">{t('settings.showPhone')}</Label>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Make your phone number visible to other users
+                    {t('settings.showPhoneDesc')}
                   </p>
                 </div>
                 <Switch
@@ -307,9 +322,9 @@ const SettingsPage = () => {
 
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50">
                 <div>
-                  <Label className="text-gray-900 dark:text-white">Analytics Collection</Label>
+                  <Label className="text-gray-900 dark:text-white">{t('settings.analyticsCollection')}</Label>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Allow collection of usage analytics
+                    {t('settings.analyticsCollectionDesc')}
                   </p>
                 </div>
                 <Switch
@@ -325,7 +340,7 @@ const SettingsPage = () => {
                 className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
               >
                 <Save className="w-4 h-4 mr-2" />
-                Save Changes
+                {t('common.save')}
               </Button>
             </div>
           </GlassCard>
@@ -337,16 +352,16 @@ const SettingsPage = () => {
             <div className="flex items-center gap-3 mb-6">
               <Database className="w-6 h-6 text-blue-500" />
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                System Configuration
+                {t('settings.systemConfig')}
               </h3>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 rounded-lg bg-white/50 dark:bg-gray-800/50">
                 <div>
-                  <Label className="text-gray-900 dark:text-white">Automatic Backup</Label>
+                  <Label className="text-gray-900 dark:text-white">{t('settings.autoBackup')}</Label>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Enable automatic data backups
+                    {t('settings.autoBackupDesc')}
                   </p>
                 </div>
                 <Switch
@@ -356,7 +371,7 @@ const SettingsPage = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="backupFrequency">Backup Frequency</Label>
+                <Label htmlFor="backupFrequency">{t('settings.backupFrequency')}</Label>
                 <select
                   id="backupFrequency"
                   value={systemSettings.backupFrequency}
@@ -364,41 +379,41 @@ const SettingsPage = () => {
                   className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   disabled={!systemSettings.autoBackup}
                 >
-                  <option value="hourly">Hourly</option>
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
+                  <option value="hourly">{t('settings.hourly')}</option>
+                  <option value="daily">{t('settings.daily')}</option>
+                  <option value="weekly">{t('settings.weekly')}</option>
+                  <option value="monthly">{t('settings.monthly')}</option>
                 </select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dataRetention">Data Retention (days)</Label>
+                <Label htmlFor="dataRetention">{t('settings.dataRetention')}</Label>
                 <select
                   id="dataRetention"
                   value={systemSettings.dataRetention}
                   onChange={(e) => setSystemSettings({ ...systemSettings, dataRetention: e.target.value })}
                   className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
-                  <option value="30">30 days</option>
-                  <option value="60">60 days</option>
-                  <option value="90">90 days</option>
-                  <option value="180">180 days</option>
-                  <option value="365">1 year</option>
+                  <option value="30">30</option>
+                  <option value="60">60</option>
+                  <option value="90">90</option>
+                  <option value="180">180</option>
+                  <option value="365">365</option>
                 </select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
+                <Label htmlFor="sessionTimeout">{t('settings.sessionTimeout')}</Label>
                 <select
                   id="sessionTimeout"
                   value={systemSettings.sessionTimeout}
                   onChange={(e) => setSystemSettings({ ...systemSettings, sessionTimeout: e.target.value })}
                   className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
-                  <option value="15">15 minutes</option>
-                  <option value="30">30 minutes</option>
-                  <option value="60">1 hour</option>
-                  <option value="120">2 hours</option>
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="60">60</option>
+                  <option value="120">120</option>
                 </select>
               </div>
             </div>
@@ -409,7 +424,7 @@ const SettingsPage = () => {
                 className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
               >
                 <Save className="w-4 h-4 mr-2" />
-                Save Changes
+                {t('common.save')}
               </Button>
             </div>
           </GlassCard>

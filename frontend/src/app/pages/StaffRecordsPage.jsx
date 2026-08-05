@@ -12,8 +12,10 @@ import {
 } from '../components/ui/table';
 import { Badge } from '../components/ui/badge';
 import { Search, Filter, Download, Eye } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const StaffRecordsPage = () => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
 
   // Mock data for staff records
@@ -85,21 +87,28 @@ const StaffRecordsPage = () => {
     return styles[status] || styles.pending;
   };
 
+  const getStatusLabel = (status) => {
+    if (status === 'completed') return t('staffRecords.completed');
+    if (status === 'pending') return t('staffRecords.pending');
+    if (status === 'in-progress') return t('staffRecords.inProgress');
+    return status;
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Staff Records</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('staffRecords.title')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            View and manage assigned patient records
+            {t('staffRecords.subtitle')}
           </p>
         </div>
         <Button
           className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg"
         >
           <Download className="w-4 h-4 mr-2" />
-          Export Records
+          {t('staffRecords.exportRecords')}
         </Button>
       </div>
 
@@ -109,7 +118,7 @@ const StaffRecordsPage = () => {
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <Input
-              placeholder="Search by record ID, patient name, or patient ID..."
+              placeholder={t('staffRecords.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 backdrop-blur-sm bg-white/50 dark:bg-gray-800/50"
@@ -117,7 +126,7 @@ const StaffRecordsPage = () => {
           </div>
           <Button variant="outline" className="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50">
             <Filter className="w-4 h-4 mr-2" />
-            Filters
+            {t('common.filters')}
           </Button>
         </div>
       </GlassCard>
@@ -125,23 +134,23 @@ const StaffRecordsPage = () => {
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <GlassCard className="p-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Records</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('staffRecords.totalRecords')}</p>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">{records.length}</p>
         </GlassCard>
         <GlassCard className="p-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Completed</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('staffRecords.completed')}</p>
           <p className="text-3xl font-bold text-green-600">
             {records.filter(r => r.status === 'completed').length}
           </p>
         </GlassCard>
         <GlassCard className="p-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Pending</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('staffRecords.pending')}</p>
           <p className="text-3xl font-bold text-yellow-600">
             {records.filter(r => r.status === 'pending').length}
           </p>
         </GlassCard>
         <GlassCard className="p-6">
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">In Progress</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('staffRecords.inProgress')}</p>
           <p className="text-3xl font-bold text-blue-600">
             {records.filter(r => r.status === 'in-progress').length}
           </p>
@@ -154,14 +163,14 @@ const StaffRecordsPage = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-gray-200/50 dark:border-gray-700/50">
-                <TableHead>Record ID</TableHead>
-                <TableHead>Patient ID</TableHead>
-                <TableHead>Patient Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Assigned To</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('staffRecords.recordId')}</TableHead>
+                <TableHead>{t('staffRecords.patientId')}</TableHead>
+                <TableHead>{t('staffRecords.patientName')}</TableHead>
+                <TableHead>{t('staffRecords.type')}</TableHead>
+                <TableHead>{t('staffRecords.date')}</TableHead>
+                <TableHead>{t('staffRecords.assignedTo')}</TableHead>
+                <TableHead>{t('staffRecords.status')}</TableHead>
+                <TableHead className="text-right">{t('staffRecords.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -175,7 +184,7 @@ const StaffRecordsPage = () => {
                   <TableCell>{record.assignedTo}</TableCell>
                   <TableCell>
                     <Badge className={getStatusBadge(record.status)}>
-                      {record.status}
+                      {getStatusLabel(record.status)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

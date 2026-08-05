@@ -20,8 +20,10 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const AnalyticsPage = () => {
+  const { t } = useLanguage();
   const [timeRange, setTimeRange] = useState('month');
 
   const monthlyData = [
@@ -59,14 +61,20 @@ const AnalyticsPage = () => {
     { age: '65+', count: 180 }
   ];
 
+  const timeRangeLabels = {
+    week: t('analytics.week'),
+    month: t('analytics.month'),
+    year: t('analytics.year'),
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Analytics</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('analytics.title')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Comprehensive insights and reports
+            {t('analytics.subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -80,12 +88,12 @@ const AnalyticsPage = () => {
                   : 'backdrop-blur-md bg-white/70 dark:bg-gray-800/70 text-gray-700 dark:text-gray-300 hover:bg-white/90 dark:hover:bg-gray-800/90'
               }`}
             >
-              {range.charAt(0).toUpperCase() + range.slice(1)}
+              {timeRangeLabels[range]}
             </button>
           ))}
           <Button variant="outline" className="backdrop-blur-md bg-white/70 dark:bg-gray-800/70">
             <Download className="w-4 h-4 mr-2" />
-            Export
+            {t('analytics.export')}
           </Button>
         </div>
       </div>
@@ -93,7 +101,7 @@ const AnalyticsPage = () => {
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Patients"
+          title={t('analytics.totalPatients')}
           value="1,234"
           icon={Users}
           trend="up"
@@ -101,7 +109,7 @@ const AnalyticsPage = () => {
           color="blue"
         />
         <StatCard
-          title="Total Records"
+          title={t('analytics.totalRecords')}
           value="4,562"
           icon={FileText}
           trend="up"
@@ -109,7 +117,7 @@ const AnalyticsPage = () => {
           color="green"
         />
         <StatCard
-          title="Monthly Growth"
+          title={t('analytics.monthlyGrowth')}
           value="18.5%"
           icon={TrendingUp}
           trend="up"
@@ -117,7 +125,7 @@ const AnalyticsPage = () => {
           color="purple"
         />
         <StatCard
-          title="Active Cases"
+          title={t('analytics.activeCases')}
           value="342"
           icon={Activity}
           trend="down"
@@ -131,7 +139,7 @@ const AnalyticsPage = () => {
         {/* Monthly Trends - Area Chart */}
         <GlassCard className="p-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Monthly Patient Trends
+            {t('analytics.monthlyTrends')}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={monthlyData}>
@@ -178,7 +186,7 @@ const AnalyticsPage = () => {
         {/* Department Distribution - Pie Chart */}
         <GlassCard className="p-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Department Distribution
+            {t('analytics.departmentDistribution')}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -207,7 +215,7 @@ const AnalyticsPage = () => {
         {/* Weekly Activity - Bar Chart */}
         <GlassCard className="p-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Weekly Activity Overview
+            {t('analytics.weeklyActivity')}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={weeklyActivityData}>
@@ -233,7 +241,7 @@ const AnalyticsPage = () => {
         {/* Age Distribution */}
         <GlassCard className="p-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Patient Age Distribution
+            {t('analytics.ageDistribution')}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={ageDistribution} layout="horizontal">
@@ -257,12 +265,12 @@ const AnalyticsPage = () => {
       {/* Performance Metrics */}
       <GlassCard className="p-6">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
-          Performance Metrics
+          {t('analytics.performanceMetrics')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Patient Satisfaction</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t('analytics.patientSatisfaction')}</span>
               <Calendar className="w-5 h-5 text-blue-500" />
             </div>
             <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">94.5%</div>
@@ -273,7 +281,7 @@ const AnalyticsPage = () => {
 
           <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Treatment Success</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t('analytics.treatmentSuccess')}</span>
               <Activity className="w-5 h-5 text-green-500" />
             </div>
             <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">87.2%</div>
@@ -284,7 +292,7 @@ const AnalyticsPage = () => {
 
           <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600 dark:text-gray-400">Average Wait Time</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{t('analytics.avgWaitTime')}</span>
               <TrendingUp className="w-5 h-5 text-purple-500" />
             </div>
             <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">12 min</div>

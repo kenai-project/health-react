@@ -23,10 +23,12 @@ import { Badge } from '../components/ui/badge';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
 import { Search, Plus, Edit, Trash2, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '../i18n/LanguageContext';
 
 import { usersService } from '../services/api';
 
 const UserManagementPage = () => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -58,7 +60,7 @@ const UserManagementPage = () => {
       setUsers(mapped);
     } catch (e) {
       console.error('Failed to load users', e);
-      toast.error('Failed to load users');
+      toast.error(t('userMgmt.loadFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -73,14 +75,14 @@ const UserManagementPage = () => {
 
   const handleEdit = (user) => {
     // TODO: Backend update endpoint for /admin/users is not implemented in this repo.
-    toast.error('Edit not implemented (missing backend endpoint)');
+    toast.error(t('userMgmt.editNotImplemented'));
     console.warn('Edit TODO: backend update endpoint not implemented');
   };
 
   const handleDelete = async (id) => {
     // TODO: Backend does not expose admin DELETE /admin/users in this repo.
     // Keep action disabled until the endpoint exists.
-    toast.error('Delete not implemented (missing backend endpoint)');
+    toast.error(t('userMgmt.deleteNotImplemented'));
     console.warn('Delete TODO: backend DELETE /admin/users not implemented');
   };
 
@@ -90,7 +92,7 @@ const UserManagementPage = () => {
       if (selectedUser) {
         // TODO: Backend does not expose admin update in this repo.
         // Keep UI action disabled until endpoint exists.
-        toast.error('Edit not implemented (missing backend endpoint)');
+        toast.error(t('userMgmt.editNotImplemented'));
         console.warn('Edit TODO: backend update endpoint not implemented');
         return;
       }
@@ -110,14 +112,14 @@ const UserManagementPage = () => {
       };
 
       await usersService.create(payload);
-      toast.success('User created successfully');
+      toast.success(t('userMgmt.created'));
 
       // Refresh from backend so user persists after F5
       await loadUsers();
       handleCloseDialog();
     } catch (err) {
       console.error('Create user failed', err);
-      toast.error('Failed to create user');
+      toast.error(t('userMgmt.createFailed'));
     }
   };
 
@@ -165,9 +167,9 @@ const UserManagementPage = () => {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">User Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('userMgmt.title')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage system users and permissions
+            {t('userMgmt.subtitle')}
           </p>
         </div>
         <Button
@@ -175,7 +177,7 @@ const UserManagementPage = () => {
           className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg"
         >
           <UserPlus className="w-4 h-4 mr-2" />
-          Add User
+          {t('userMgmt.addUser')}
         </Button>
       </div>
 
@@ -184,7 +186,7 @@ const UserManagementPage = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <Input
-            placeholder="Search by name, username, or email..."
+            placeholder={t('userMgmt.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 backdrop-blur-sm bg-white/50 dark:bg-gray-800/50"
@@ -198,13 +200,13 @@ const UserManagementPage = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-gray-200/50 dark:border-gray-700/50">
-                <TableHead>User</TableHead>
-                <TableHead>Username</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Login</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('userMgmt.user')}</TableHead>
+                <TableHead>{t('userMgmt.username')}</TableHead>
+                <TableHead>{t('userMgmt.email')}</TableHead>
+                <TableHead>{t('userMgmt.role')}</TableHead>
+                <TableHead>{t('userMgmt.status')}</TableHead>
+                <TableHead>{t('userMgmt.lastLogin')}</TableHead>
+                <TableHead className="text-right">{t('userMgmt.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -236,7 +238,7 @@ const UserManagementPage = () => {
                           : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
                       }
                     >
-                      {user.status}
+                      {user.status === 'active' ? t('userMgmt.statusActive') : t('userMgmt.statusInactive')}
                     </Badge>
                   </TableCell>
                   <TableCell>{new Date(user.lastLogin).toLocaleDateString()}</TableCell>
@@ -273,18 +275,18 @@ const UserManagementPage = () => {
         <DialogContent className="backdrop-blur-md bg-white/95 dark:bg-gray-800/95 sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
-              {selectedUser ? 'Edit User' : 'Add New User'}
+              {selectedUser ? t('userMgmt.editUser') : t('userMgmt.addNewUser')}
             </DialogTitle>
             <DialogDescription>
               {selectedUser
-                ? 'Update the user details'
-                : 'Fill in the details to create a new user'}
+                ? t('userMgmt.editUserDesc')
+                : t('userMgmt.addUserDesc')}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">{t('userMgmt.fullName')}</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -293,7 +295,7 @@ const UserManagementPage = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">{t('userMgmt.username')}</Label>
                 <Input
                   id="username"
                   value={formData.username}
@@ -302,7 +304,7 @@ const UserManagementPage = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('userMgmt.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -313,52 +315,52 @@ const UserManagementPage = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
+                  <Label htmlFor="role">{t('userMgmt.role')}</Label>
                   <select
                     id="role"
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   >
-                    <option value="staff">Staff</option>
-                    <option value="nurse">Nurse</option>
-                    <option value="doctor">Doctor</option>
-                    <option value="admin">Admin</option>
+                    <option value="staff">{t('userMgmt.roleStaff')}</option>
+                    <option value="nurse">{t('userMgmt.roleNurse')}</option>
+                    <option value="doctor">{t('userMgmt.roleDoctor')}</option>
+                    <option value="admin">{t('userMgmt.roleAdmin')}</option>
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
+                  <Label htmlFor="status">{t('userMgmt.status')}</Label>
                   <select
                     id="status"
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="active">{t('userMgmt.statusActive')}</option>
+                    <option value="inactive">{t('userMgmt.statusInactive')}</option>
                   </select>
                 </div>
               </div>
               {!selectedUser && (
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('userMgmt.password')}</Label>
                   <Input
                     id="password"
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required={!selectedUser}
-                    placeholder={selectedUser ? 'Leave blank to keep current password' : ''}
+                    placeholder={selectedUser ? t('userMgmt.passwordPlaceholder') : ''}
                   />
                 </div>
               )}
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button type="submit" className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                {selectedUser ? 'Update' : 'Create'}
+                {selectedUser ? t('common.update') : t('common.create')}
               </Button>
             </DialogFooter>
           </form>

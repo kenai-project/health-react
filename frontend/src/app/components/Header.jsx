@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Menu, Moon, Sun, Bell, LogOut } from 'lucide-react';
+import { Menu, Moon, Sun, Bell, LogOut, Globe } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { useNavigate } from 'react-router';
 import {
   DropdownMenu,
@@ -16,21 +17,22 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 const Header = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { t, language, languages, changeLanguage } = useLanguage();
   const navigate = useNavigate();
   const [notifications] = useState([
   {
     id: 1,
-    title: 'Health Report Generated',
+    title: t('header.notif1'),
     time: '2 mins ago',
   },
   {
     id: 2,
-    title: 'New Patient Registered',
+    title: t('header.notif2'),
     time: '10 mins ago',
   },
   {
     id: 3,
-    title: 'Backup Completed',
+    title: t('header.notif3'),
     time: '1 hour ago',
   },
 ]);
@@ -62,10 +64,10 @@ const Header = ({ onMenuClick }) => {
           </button>
           <div>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Welcome back, {user?.name || user?.username || 'User'}
+              {t('header.welcome', { name: user?.name || user?.username || 'User' })}
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {new Date().toLocaleDateString('en-US', { 
+              {new Date().toLocaleDateString(language === 'en' ? 'en-US' : language, { 
                 weekday: 'long', 
                 year: 'numeric', 
                 month: 'long', 
@@ -76,11 +78,38 @@ const Header = ({ onMenuClick }) => {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Language Selector */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1"
+                aria-label={t('settings.language')}
+              >
+                <Globe className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                <span className="hidden sm:inline text-xs font-medium text-gray-700 dark:text-gray-300">
+                  {language.toUpperCase()}
+                </span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {Object.entries(languages).map(([code, { label, flag }]) => (
+                <DropdownMenuItem
+                  key={code}
+                  onClick={() => changeLanguage(code)}
+                  className={language === code ? 'bg-blue-50 dark:bg-blue-900/30' : ''}
+                >
+                  <span className="mr-2 text-lg">{flag}</span>
+                  {label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            aria-label="Toggle theme"
+            aria-label={t('login.toggleTheme')}
           >
             {theme === 'light' ? (
               <Moon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
@@ -94,7 +123,7 @@ const Header = ({ onMenuClick }) => {
   <DropdownMenuTrigger asChild>
     <button
       className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"
-      aria-label="Notifications"
+      aria-label={t('header.notifications')}
     >
       <Bell className="w-5 h-5 text-gray-700 dark:text-gray-300" />
 
@@ -110,13 +139,13 @@ const Header = ({ onMenuClick }) => {
     align="end"
     className="w-80 backdrop-blur-md bg-white/95 dark:bg-gray-800/95"
   >
-    <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+    <DropdownMenuLabel>{t('header.notifications')}</DropdownMenuLabel>
 
     <DropdownMenuSeparator />
 
     {notifications.length === 0 ? (
       <div className="p-4 text-sm text-gray-500">
-        No Notifications
+        {t('header.noNotifications')}
       </div>
     ) : (
       notifications.map((item) => (
@@ -157,18 +186,18 @@ const Header = ({ onMenuClick }) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 backdrop-blur-md bg-white/95 dark:bg-gray-800/95">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('header.myAccount')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/profile')}>
-                Profile
+                {t('common.profile')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/settings')}>
-                Settings
+                {t('common.settings')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                {t('common.logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

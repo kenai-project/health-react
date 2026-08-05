@@ -17,8 +17,10 @@ import { llmService } from '../services/api';
 import VoiceButton from '../../features/voice/components/VoiceButton';
 import AutoSpeakToggle from '../../features/voice/components/AutoSpeakToggle';
 import useSpeechSynthesis from '../../features/voice/hooks/useSpeechSynthesis';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const LLMAssistantPage = () => {
+  const { t } = useLanguage();
   // Health status
   const [healthStatus, setHealthStatus] = useState(null);
   const [healthLoading, setHealthLoading] = useState(false);
@@ -80,7 +82,7 @@ const LLMAssistantPage = () => {
             }
           })
           .catch((error) => {
-            const errorMsg = error.response?.data?.detail || 'Failed to send message';
+            const errorMsg = error.response?.data?.detail || t('llm.errorSend');
             toast.error(errorMsg);
           })
           .finally(() => {
@@ -88,7 +90,7 @@ const LLMAssistantPage = () => {
           });
       }
     }, 300);
-  }, [messages, autoSpeakEnabled, speak]);
+  }, [messages, autoSpeakEnabled, speak, t]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -106,7 +108,7 @@ const LLMAssistantPage = () => {
       setHealthStatus(result);
     } catch (error) {
       const errorMsg =
-        error.response?.data?.detail || 'Failed to check LLM health';
+        error.response?.data?.detail || t('llm.errorHealth');
       toast.error(errorMsg);
       setHealthStatus({ status: 'error', detail: errorMsg });
     } finally {
@@ -150,7 +152,7 @@ const LLMAssistantPage = () => {
       }
     } catch (error) {
       const errorMsg =
-        error.response?.data?.detail || 'Failed to send message';
+        error.response?.data?.detail || t('llm.errorSend');
       toast.error(errorMsg);
     } finally {
       setChatLoading(false);
@@ -176,7 +178,7 @@ const LLMAssistantPage = () => {
       }
     } catch (error) {
       const errorMsg =
-        error.response?.data?.detail || 'Failed to analyze health data';
+        error.response?.data?.detail || t('llm.errorAnalyze');
       toast.error(errorMsg);
     } finally {
       setAnalyzeLoading(false);
@@ -195,7 +197,7 @@ const LLMAssistantPage = () => {
       }
     } catch (error) {
       const errorMsg =
-        error.response?.data?.detail || 'Failed to generate suggestions';
+        error.response?.data?.detail || t('llm.errorSuggestions');
       toast.error(errorMsg);
     } finally {
       setSuggestionsLoading(false);
@@ -216,13 +218,13 @@ const LLMAssistantPage = () => {
   };
 
   const getHealthStatusText = () => {
-    if (healthLoading) return 'Checking LLM availability...';
-    if (!healthStatus) return 'Not checked';
+    if (healthLoading) return t('llm.checking');
+    if (!healthStatus) return t('llm.notChecked');
     if (healthStatus.status === 'ok' && healthStatus.model_available)
-      return `Ollama is running (model: ${healthStatus.model})`;
+      return t('llm.running', { model: healthStatus.model });
     if (healthStatus.status === 'model_not_found')
-      return `Ollama running but model '${healthStatus.model}' not found`;
-    return healthStatus.detail || 'LLM service unavailable';
+      return t('llm.modelNotFound', { model: healthStatus.model });
+    return healthStatus.detail || t('llm.unavailable');
   };
 
   return (
@@ -230,10 +232,10 @@ const LLMAssistantPage = () => {
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          AI Health Assistant
+          {t('llm.title')}
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Chat with your personal AI health assistant powered by local Ollama
+          {t('llm.subtitle')}
         </p>
       </div>
 
@@ -244,7 +246,7 @@ const LLMAssistantPage = () => {
             {getHealthStatusIcon()}
             <div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                LLM Health Status
+                {t('llm.healthStatus')}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {getHealthStatusText()}
@@ -272,7 +274,7 @@ const LLMAssistantPage = () => {
           <GlassCard className="p-6 flex flex-col h-[500px]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                Chat with AI Assistant
+                {t('llm.chatTitle')}
               </h3>
               <AutoSpeakToggle
                 enabled={autoSpeakEnabled}
@@ -287,9 +289,9 @@ const LLMAssistantPage = () => {
               {messages.length === 0 ? (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                   <Bot className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>Ask me anything about your health data!</p>
+                  <p>{t('llm.emptyState')}</p>
                   <p className="text-xs mt-2">
-                    Try: "What trends do you see in my weight?"
+                    {t('llm.emptyStateHint')}
                   </p>
                 </div>
               ) : (
@@ -317,7 +319,7 @@ const LLMAssistantPage = () => {
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type your message or click the mic to speak..."
+                placeholder={t('llm.inputPlaceholder')}
                 disabled={chatLoading}
                 className="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
               />
@@ -347,7 +349,7 @@ const LLMAssistantPage = () => {
           <GlassCard className="p-6">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Activity className="w-5 h-5 text-blue-500" />
-              Health Analysis
+              {t('llm.healthAnalysis')}
             </h3>
             <Button
               onClick={handleAnalyze}
@@ -357,10 +359,10 @@ const LLMAssistantPage = () => {
               {analyzeLoading ? (
                 <div className="flex items-center gap-2">
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  Analyzing...
+                  {t('llm.analyzing')}
                 </div>
               ) : (
-                'Analyze My Health Data'
+                t('llm.analyze')
               )}
             </Button>
             {analyzeResult ? (
@@ -369,7 +371,7 @@ const LLMAssistantPage = () => {
               </div>
             ) : (
               <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
-                Click the button to generate a health analysis
+                {t('llm.analyzeHint')}
               </div>
             )}
           </GlassCard>
@@ -378,7 +380,7 @@ const LLMAssistantPage = () => {
           <GlassCard className="p-6">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Lightbulb className="w-5 h-5 text-yellow-500" />
-              Wellness Suggestions
+              {t('llm.wellnessSuggestions')}
             </h3>
             <Button
               onClick={handleSuggestions}
@@ -388,10 +390,10 @@ const LLMAssistantPage = () => {
               {suggestionsLoading ? (
                 <div className="flex items-center gap-2">
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  Generating...
+                  {t('llm.generating')}
                 </div>
               ) : (
-                'Get Wellness Suggestions'
+                t('llm.getSuggestions')
               )}
             </Button>
             {suggestionsResult ? (
@@ -400,7 +402,7 @@ const LLMAssistantPage = () => {
               </div>
             ) : (
               <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
-                Click the button to get personalized wellness suggestions
+                {t('llm.suggestionsHint')}
               </div>
             )}
           </GlassCard>

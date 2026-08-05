@@ -22,8 +22,10 @@ import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Search, Plus, Edit, Trash2, Eye, Filter } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const RecordsPage = () => {
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -109,17 +111,17 @@ const RecordsPage = () => {
 
   const handleDelete = (id) => {
     setRecords(records.filter(r => r.id !== id));
-    toast.success('Record deleted successfully');
+    toast.success(t('records.deleted'));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (selectedRecord) {
       setRecords(records.map(r => r.id === selectedRecord.id ? { ...formData, id: r.id } : r));
-      toast.success('Record updated successfully');
+      toast.success(t('records.updated'));
     } else {
       setRecords([...records, { ...formData, id: Date.now() }]);
-      toast.success('Record created successfully');
+      toast.success(t('records.created'));
     }
     handleCloseDialog();
   };
@@ -150,9 +152,9 @@ const RecordsPage = () => {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Health Records</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('records.title')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage patient health records
+            {t('records.subtitle')}
           </p>
         </div>
         <Button
@@ -160,7 +162,7 @@ const RecordsPage = () => {
           className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Add Record
+          {t('records.addRecord')}
         </Button>
       </div>
 
@@ -170,7 +172,7 @@ const RecordsPage = () => {
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <Input
-              placeholder="Search by patient name, ID, or diagnosis..."
+              placeholder={t('records.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 backdrop-blur-sm bg-white/50 dark:bg-gray-800/50"
@@ -178,7 +180,7 @@ const RecordsPage = () => {
           </div>
           <Button variant="outline" className="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50">
             <Filter className="w-4 h-4 mr-2" />
-            Filters
+            {t('common.filters')}
           </Button>
         </div>
       </GlassCard>
@@ -189,13 +191,13 @@ const RecordsPage = () => {
           <Table>
             <TableHeader>
               <TableRow className="border-gray-200/50 dark:border-gray-700/50">
-                <TableHead>Patient ID</TableHead>
-                <TableHead>Patient Name</TableHead>
-                <TableHead>Diagnosis</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Doctor</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('records.patientId')}</TableHead>
+                <TableHead>{t('records.patientName')}</TableHead>
+                <TableHead>{t('records.diagnosis')}</TableHead>
+                <TableHead>{t('records.date')}</TableHead>
+                <TableHead>{t('records.doctor')}</TableHead>
+                <TableHead>{t('records.status')}</TableHead>
+                <TableHead className="text-right">{t('records.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -215,7 +217,7 @@ const RecordsPage = () => {
                           : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
                       }
                     >
-                      {record.status}
+                      {record.status === 'active' ? t('records.statusActive') : t('records.statusCompleted')}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -258,21 +260,21 @@ const RecordsPage = () => {
         <DialogContent className="backdrop-blur-md bg-white/95 dark:bg-gray-800/95 sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
-              {isViewMode ? 'View Record' : selectedRecord ? 'Edit Record' : 'Add New Record'}
+              {isViewMode ? t('records.viewRecord') : selectedRecord ? t('records.editRecord') : t('records.addNewRecord')}
             </DialogTitle>
             <DialogDescription>
               {isViewMode
-                ? 'Record details'
+                ? t('records.viewRecordDesc')
                 : selectedRecord
-                ? 'Update the health record details'
-                : 'Fill in the details to create a new health record'}
+                ? t('records.editRecordDesc')
+                : t('records.addRecordDesc')}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="patientId">Patient ID</Label>
+                  <Label htmlFor="patientId">{t('records.patientId')}</Label>
                   <Input
                     id="patientId"
                     value={formData.patientId}
@@ -282,7 +284,7 @@ const RecordsPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="patientName">Patient Name</Label>
+                  <Label htmlFor="patientName">{t('records.patientName')}</Label>
                   <Input
                     id="patientName"
                     value={formData.patientName}
@@ -293,7 +295,7 @@ const RecordsPage = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="diagnosis">Diagnosis</Label>
+                <Label htmlFor="diagnosis">{t('records.diagnosis')}</Label>
                 <Input
                   id="diagnosis"
                   value={formData.diagnosis}
@@ -304,7 +306,7 @@ const RecordsPage = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Date</Label>
+                  <Label htmlFor="date">{t('records.date')}</Label>
                   <Input
                     id="date"
                     type="date"
@@ -315,7 +317,7 @@ const RecordsPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="doctor">Doctor</Label>
+                  <Label htmlFor="doctor">{t('records.doctor')}</Label>
                   <Input
                     id="doctor"
                     value={formData.doctor}
@@ -326,7 +328,7 @@ const RecordsPage = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
+                <Label htmlFor="status">{t('records.status')}</Label>
                 <select
                   id="status"
                   value={formData.status}
@@ -334,12 +336,12 @@ const RecordsPage = () => {
                   disabled={isViewMode}
                   className="w-full px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
-                  <option value="active">Active</option>
-                  <option value="completed">Completed</option>
+                  <option value="active">{t('records.statusActive')}</option>
+                  <option value="completed">{t('records.statusCompleted')}</option>
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">{t('records.notes')}</Label>
                 <textarea
                   id="notes"
                   value={formData.notes}
@@ -353,16 +355,16 @@ const RecordsPage = () => {
               {!isViewMode && (
                 <>
                   <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button type="submit" className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white">
-                    {selectedRecord ? 'Update' : 'Create'}
+                    {selectedRecord ? t('common.update') : t('common.create')}
                   </Button>
                 </>
               )}
               {isViewMode && (
                 <Button type="button" onClick={handleCloseDialog}>
-                  Close
+                  {t('common.close')}
                 </Button>
               )}
             </DialogFooter>

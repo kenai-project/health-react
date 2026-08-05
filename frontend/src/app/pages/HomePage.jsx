@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import GlassCard from '../components/GlassCard';
 import { 
   LayoutDashboard, 
@@ -18,46 +19,47 @@ import { Button } from '../components/ui/button';
 const HomePage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
 
   const menuCards = [
     {
-      title: 'Dashboard',
-      description: 'View statistics and overview',
+      title: t('home.dashboard'),
+      description: t('home.dashboardDesc'),
       icon: LayoutDashboard,
       path: '/dashboard',
       color: 'from-blue-500 to-blue-600'
     },
     {
-      title: 'Records',
-      description: 'Manage health records',
+      title: t('home.records'),
+      description: t('home.recordsDesc'),
       icon: FileText,
       path: '/records',
       color: 'from-green-500 to-green-600'
     },
     {
-      title: 'Analytics',
-      description: 'View detailed analytics',
+      title: t('home.analytics'),
+      description: t('home.analyticsDesc'),
       icon: BarChart3,
       path: '/analytics',
       color: 'from-purple-500 to-purple-600'
     },
     {
-      title: 'Users',
-      description: 'Manage system users',
+      title: t('home.users'),
+      description: t('home.usersDesc'),
       icon: Users,
       path: '/admin/users',
       color: 'from-orange-500 to-orange-600'
     },
     {
-      title: 'Profile',
-      description: 'Update your profile',
+      title: t('home.profile'),
+      description: t('home.profileDesc'),
       icon: UserCircle,
       path: '/profile',
       color: 'from-indigo-500 to-indigo-600'
     },
     {
-      title: 'AI Assistant',
-      description: 'Chat with your AI health assistant',
+      title: t('home.aiAssistant'),
+      description: t('home.aiAssistantDesc'),
       icon: Bot,
       path: '/llm',
       color: 'from-teal-500 to-cyan-600'
@@ -65,10 +67,10 @@ const HomePage = () => {
   ];
 
   const recentActivities = [
-    { id: 1, action: 'New patient record added', time: '5 minutes ago', type: 'create' },
-    { id: 2, action: 'User profile updated', time: '1 hour ago', type: 'update' },
-    { id: 3, action: 'Report generated', time: '2 hours ago', type: 'report' },
-    { id: 4, action: 'System backup completed', time: '3 hours ago', type: 'system' }
+    { id: 1, action: t('home.activity1'), time: '5 minutes ago', type: 'create' },
+    { id: 2, action: t('home.activity2'), time: '1 hour ago', type: 'update' },
+    { id: 3, action: t('home.activity3'), time: '2 hours ago', type: 'report' },
+    { id: 4, action: t('home.activity4'), time: '3 hours ago', type: 'system' }
   ];
 
   const handleLogout = () => {
@@ -83,10 +85,10 @@ const HomePage = () => {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Welcome, {user?.name || user?.username || 'Admin'}! 👋
+              {t('home.welcome', { name: user?.name || user?.username || 'Admin' })}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Here's what's happening with your health management system today
+              {t('home.subtitle')}
             </p>
           </div>
           <Button
@@ -95,7 +97,7 @@ const HomePage = () => {
             className="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
           >
             <LogOut className="w-4 h-4 mr-2" />
-            Logout
+            {t('home.logout')}
           </Button>
         </div>
       </GlassCard>
@@ -132,7 +134,7 @@ const HomePage = () => {
           <div className="flex items-center gap-3 mb-6">
             <Activity className="w-6 h-6 text-blue-500" />
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Recent Activity
+              {t('home.recentActivity')}
             </h2>
           </div>
           <div className="space-y-4">
@@ -161,33 +163,33 @@ const HomePage = () => {
             className="w-full mt-4 backdrop-blur-sm bg-white/50 dark:bg-gray-800/50"
             onClick={() => navigate('/analytics')}
           >
-            View All Activity
+            {t('home.viewAllActivity')}
           </Button>
         </GlassCard>
 
         {/* Quick Stats */}
         <GlassCard className="p-6">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-            Quick Stats
+            {t('home.quickStats')}
           </h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Patients</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('home.totalPatients')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">1,234</p>
               </div>
               <Users className="w-8 h-8 text-blue-500" />
             </div>
             <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active Records</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('home.activeRecords')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">856</p>
               </div>
               <FileText className="w-8 h-8 text-green-500" />
             </div>
             <div className="flex items-center justify-between p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">This Month</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{t('home.thisMonth')}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">342</p>
               </div>
               <BarChart3 className="w-8 h-8 text-purple-500" />

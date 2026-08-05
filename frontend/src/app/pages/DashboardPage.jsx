@@ -3,8 +3,10 @@ import GlassCard from '../components/GlassCard';
 import StatCard from '../components/StatCard';
 import { Users, FileText, Activity, TrendingUp, Calendar, Clock } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const DashboardPage = () => {
+  const { t } = useLanguage();
   const [timeRange, setTimeRange] = useState('week');
 
   // Mock data for charts
@@ -45,20 +47,26 @@ const DashboardPage = () => {
   ];
 
   const quickActions = [
-    { id: 1, title: 'Add Patient', icon: Users, color: 'blue' },
-    { id: 2, title: 'New Record', icon: FileText, color: 'green' },
-    { id: 3, title: 'Schedule', icon: Calendar, color: 'purple' },
-    { id: 4, title: 'Reports', icon: TrendingUp, color: 'orange' }
+    { id: 1, title: t('dashboard.addPatient'), icon: Users, color: 'blue' },
+    { id: 2, title: t('dashboard.newRecord'), icon: FileText, color: 'green' },
+    { id: 3, title: t('dashboard.schedule'), icon: Calendar, color: 'purple' },
+    { id: 4, title: t('dashboard.reports'), icon: TrendingUp, color: 'orange' }
   ];
+
+  const timeRangeLabels = {
+    day: t('dashboard.day'),
+    week: t('dashboard.week'),
+    month: t('dashboard.month'),
+  };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Overview of your health management system
+            {t('dashboard.subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
@@ -72,7 +80,7 @@ const DashboardPage = () => {
                   : 'backdrop-blur-md bg-white/70 dark:bg-gray-800/70 text-gray-700 dark:text-gray-300 hover:bg-white/90 dark:hover:bg-gray-800/90'
               }`}
             >
-              {range.charAt(0).toUpperCase() + range.slice(1)}
+              {timeRangeLabels[range]}
             </button>
           ))}
         </div>
@@ -81,7 +89,7 @@ const DashboardPage = () => {
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Patients"
+          title={t('dashboard.totalPatients')}
           value="1,234"
           icon={Users}
           trend="up"
@@ -89,7 +97,7 @@ const DashboardPage = () => {
           color="blue"
         />
         <StatCard
-          title="Active Records"
+          title={t('dashboard.activeRecords')}
           value="856"
           icon={FileText}
           trend="up"
@@ -97,7 +105,7 @@ const DashboardPage = () => {
           color="green"
         />
         <StatCard
-          title="Appointments"
+          title={t('dashboard.appointments')}
           value="342"
           icon={Calendar}
           trend="down"
@@ -105,7 +113,7 @@ const DashboardPage = () => {
           color="purple"
         />
         <StatCard
-          title="Activities"
+          title={t('dashboard.activities')}
           value="1,892"
           icon={Activity}
           trend="up"
@@ -119,7 +127,7 @@ const DashboardPage = () => {
         {/* Line Chart */}
         <GlassCard className="p-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Weekly Trends
+            {t('dashboard.weeklyTrends')}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={lineChartData}>
@@ -144,7 +152,7 @@ const DashboardPage = () => {
         {/* Pie Chart */}
         <GlassCard className="p-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Department Distribution
+            {t('dashboard.departmentDistribution')}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -170,7 +178,7 @@ const DashboardPage = () => {
         {/* Bar Chart */}
         <GlassCard className="p-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Monthly Records
+            {t('dashboard.monthlyRecords')}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={barChartData}>
@@ -193,7 +201,7 @@ const DashboardPage = () => {
         {/* Recent Activity */}
         <GlassCard className="p-6">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            Recent Activity
+            {t('dashboard.recentActivity')}
           </h3>
           <div className="space-y-4">
             {recentActivities.map((activity) => (
@@ -225,7 +233,7 @@ const DashboardPage = () => {
       {/* Quick Actions */}
       <GlassCard className="p-6">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-          Quick Actions
+          {t('dashboard.quickActions')}
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {quickActions.map((action) => {

@@ -5,6 +5,7 @@ import DocumentList from '../components/DocumentList';
 import DocumentUploader from '../components/DocumentUploader';
 import DocumentViewer from '../components/DocumentViewer';
 import Modal from '../components/Modal';
+import { useLanguage } from '@/app/i18n/LanguageContext';
 
 /**
  * DocumentsPage - Main document management page
@@ -18,6 +19,7 @@ import Modal from '../components/Modal';
  * - Accessible (ARIA, keyboard)
  */
 export default function DocumentsPage() {
+  const { t } = useLanguage();
   const {
     documents,
     loading,
@@ -95,18 +97,18 @@ export default function DocumentsPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Documents</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('documents.title')}</h1>
             <p className="text-gray-600 mt-1">
-              Upload, view, and manage your documents
+              {t('documents.subtitle')}
             </p>
           </div>
           <button
             onClick={() => setShowUploader(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            aria-label="Upload documents"
+            aria-label={t('documents.upload')}
           >
             <Plus className="w-5 h-5" />
-            Upload
+            {t('documents.upload')}
           </button>
         </div>
 
@@ -118,9 +120,9 @@ export default function DocumentsPage() {
               type="text"
               value={searchQuery}
               onChange={handleSearch}
-              placeholder="Search documents..."
+              placeholder={t('documents.searchPlaceholder')}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Search documents"
+              aria-label={t('documents.searchPlaceholder')}
             />
           </div>
           <div className="relative">
@@ -131,7 +133,7 @@ export default function DocumentsPage() {
               className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
               aria-label="Filter by file type"
             >
-              <option value="">All Types</option>
+              <option value="">{t('documents.allTypes')}</option>
               <option value="application/pdf">PDF</option>
               <option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">DOCX</option>
               <option value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">XLSX</option>
@@ -164,7 +166,7 @@ export default function DocumentsPage() {
             onClick={handleRetry}
             className="px-3 py-1 text-sm font-medium text-red-700 bg-red-100 rounded hover:bg-red-200 transition-colors"
           >
-            Retry
+            {t('common.retry')}
           </button>
         </div>
       )}
@@ -184,7 +186,11 @@ export default function DocumentsPage() {
       {pagination.total > pagination.per_page && (
         <div className="mt-6 flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            Showing {((pagination.page - 1) * pagination.per_page) + 1} to {Math.min(pagination.page * pagination.per_page, pagination.total)} of {pagination.total} documents
+            {t('documents.showing', {
+              from: ((pagination.page - 1) * pagination.per_page) + 1,
+              to: Math.min(pagination.page * pagination.per_page, pagination.total),
+              total: pagination.total,
+            })}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -192,17 +198,20 @@ export default function DocumentsPage() {
               disabled={pagination.page === 1}
               className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Previous
+              {t('common.previous')}
             </button>
             <span className="text-sm text-gray-600">
-              Page {pagination.page} of {Math.ceil(pagination.total / pagination.per_page)}
+              {t('documents.page', {
+                current: pagination.page,
+                total: Math.ceil(pagination.total / pagination.per_page),
+              })}
             </span>
             <button
               onClick={() => fetchDocuments({ page: pagination.page + 1 })}
               disabled={pagination.page >= Math.ceil(pagination.total / pagination.per_page)}
               className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Next
+              {t('common.next')}
             </button>
           </div>
         </div>
@@ -230,25 +239,25 @@ export default function DocumentsPage() {
       <Modal
         isOpen={!!deleteConfirm}
         onClose={() => setDeleteConfirm(null)}
-        title="Delete document confirmation"
+        title={t('documents.deleteConfirmation')}
         maxWidth="max-w-md"
       >
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Delete Document</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t('documents.deleteTitle')}</h3>
         <p className="text-sm text-gray-600 mb-6">
-          Are you sure you want to delete this document? This action cannot be undone.
+          {t('documents.deleteConfirm')}
         </p>
         <div className="flex items-center justify-end gap-3">
           <button
             onClick={() => setDeleteConfirm(null)}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             onClick={() => handleDelete(deleteConfirm)}
             className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
           >
-            Delete
+            {t('common.delete')}
           </button>
         </div>
       </Modal>
