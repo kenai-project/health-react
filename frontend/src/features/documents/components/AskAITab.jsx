@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Loader, MessageSquare, Copy, Check, Square } from 'lucide-react';
 import { documentService } from '@/app/services/api';
+import { useLanguage } from '@/app/i18n/LanguageContext';
 
 /**
  * AskAITab - Ask questions about the document with AI
@@ -21,6 +22,7 @@ const ANALYSIS_TYPES = {
 };
 
 export default function AskAITab({ document }) {
+  const { language } = useLanguage();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -127,13 +129,7 @@ export default function AskAITab({ document }) {
     };
 
     try {
-      const streamFn = type === 'qa'
-        ? documentService.askQuestionStream
-        : type === 'summary'
-        ? documentService.generateSummaryStream
-        : documentService.generateExplanationStream;
-
-      await streamFn(document.id, (event) => {
+      const handleEvent = (event) => {
         if (event.type === 'chunk') {
           accumulatedContent += event.content;
           updateMessage(accumulatedContent, accumulatedCitations);
@@ -146,7 +142,22 @@ export default function AskAITab({ document }) {
         } else if (event.type === 'error') {
           finalizeMessage(`Error: ${event.message}`, [], true);
         }
-      }, controller.signal);
+      };
+
+      if (type === 'qa') {
+        await documentService.askQuestionStream(
+          document.id,
+          question,
+          handleEvent,
+          controller.signal,
+          language
+        );
+      } else {
+        const streamFn = type === 'summary'
+          ? documentService.generateSummaryStream
+          : documentService.generateExplanationStream;
+        await streamFn(document.id, handleEvent, controller.signal, language);
+      }
     } catch (err) {
       finalizeMessage(`Error: ${err.message || 'Failed to generate analysis'}`, [], true);
     } finally {

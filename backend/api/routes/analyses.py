@@ -22,6 +22,7 @@ router = APIRouter(tags=["analyses"])
 # Request/Response models
 class QuestionRequest(BaseModel):
     question: str = Field(..., min_length=1)
+    language: Optional[str] = Field(default=None, max_length=10)
 
 
 class AnalysisResponse(BaseModel):
@@ -46,6 +47,7 @@ class AnalysisHistoryResponse(BaseModel):
 async def generate_summary(
     document_id: int,
     user=Depends(get_current_user),
+    language: Optional[str] = None,
 ):
     """
     Generate document summary.
@@ -53,6 +55,7 @@ async def generate_summary(
     Args:
         document_id: Document ID
         user: Current user (from JWT)
+        language: Optional preferred language code
 
     Returns:
         Analysis result
@@ -71,6 +74,7 @@ async def generate_summary(
             document_id=document_id,
             analysis_type="summary",
             user_id=user["id"],
+            preferred_language=language,
         )
         return {
             "success": True,
@@ -90,6 +94,7 @@ async def generate_summary(
 async def generate_explanation(
     document_id: int,
     user=Depends(get_current_user),
+    language: Optional[str] = None,
 ):
     """
     Generate document explanation.
@@ -97,6 +102,7 @@ async def generate_explanation(
     Args:
         document_id: Document ID
         user: Current user (from JWT)
+        language: Optional preferred language code
 
     Returns:
         Analysis result
@@ -115,6 +121,7 @@ async def generate_explanation(
             document_id=document_id,
             analysis_type="explanation",
             user_id=user["id"],
+            preferred_language=language,
         )
         return {
             "success": True,
@@ -165,6 +172,7 @@ async def ask_question(
             analysis_type="qa",
             user_id=user["id"],
             question=request.question.strip(),
+            preferred_language=request.language,
         )
         return {
             "success": True,
@@ -331,6 +339,7 @@ async def stream_summary(
     document_id: int,
     http_request: Request,
     user=Depends(get_current_user),
+    language: Optional[str] = None,
 ):
     """
     Generate document summary as a streaming SSE response.
@@ -356,6 +365,7 @@ async def stream_summary(
             analysis_type="summary",
             user_id=user["id"],
             request=http_request,
+            preferred_language=language,
         ):
             yield event
 
@@ -374,6 +384,7 @@ async def stream_explanation(
     document_id: int,
     http_request: Request,
     user=Depends(get_current_user),
+    language: Optional[str] = None,
 ):
     """
     Generate document explanation as a streaming SSE response.
@@ -399,6 +410,7 @@ async def stream_explanation(
             analysis_type="explanation",
             user_id=user["id"],
             request=http_request,
+            preferred_language=language,
         ):
             yield event
 
@@ -447,6 +459,7 @@ async def stream_question(
             user_id=user["id"],
             question=body.question.strip(),
             request=http_request,
+            preferred_language=body.language,
         ):
             yield event
 

@@ -20,7 +20,7 @@ import useSpeechSynthesis from '../../features/voice/hooks/useSpeechSynthesis';
 import { useLanguage } from '../i18n/LanguageContext';
 
 const LLMAssistantPage = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   // Health status
   const [healthStatus, setHealthStatus] = useState(null);
   const [healthLoading, setHealthLoading] = useState(false);
@@ -70,7 +70,7 @@ const LLMAssistantPage = () => {
         const userMessage = { role: 'user', content: transcript.trim() };
         setMessages((prev) => [...prev, userMessage]);
         setChatLoading(true);
-        llmService.chat(transcript.trim(), messages)
+        llmService.chat(transcript.trim(), messages, language)
           .then((response) => {
             const assistantMessage = { role: 'assistant', content: response.reply };
             setMessages((prev) => [...prev, assistantMessage]);
@@ -90,7 +90,7 @@ const LLMAssistantPage = () => {
           });
       }
     }, 300);
-  }, [messages, autoSpeakEnabled, speak, t]);
+  }, [messages, autoSpeakEnabled, speak, t, language]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -140,7 +140,7 @@ const LLMAssistantPage = () => {
     setChatLoading(true);
     try {
       // Pass current messages as history (backend appends current message)
-      const response = await llmService.chat(message, messages);
+      const response = await llmService.chat(message, messages, language);
       const assistantMessage = { role: 'assistant', content: response.reply };
       setMessages((prev) => [...prev, assistantMessage]);
       if (response.disclaimer) {
@@ -171,7 +171,7 @@ const LLMAssistantPage = () => {
     setAnalyzeLoading(true);
     setAnalyzeResult('');
     try {
-      const response = await llmService.analyze(10);
+      const response = await llmService.analyze(10, language);
       setAnalyzeResult(response.analysis);
       if (response.disclaimer) {
         setDisclaimer(response.disclaimer);
@@ -190,7 +190,7 @@ const LLMAssistantPage = () => {
     setSuggestionsLoading(true);
     setSuggestionsResult('');
     try {
-      const response = await llmService.suggestions(10);
+      const response = await llmService.suggestions(10, language);
       setSuggestionsResult(response.suggestions);
       if (response.disclaimer) {
         setDisclaimer(response.disclaimer);

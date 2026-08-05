@@ -21,7 +21,10 @@ from services.output_filter import output_filter
 logger = logging.getLogger(__name__)
 
 # Configuration
-DEFAULT_LLM_MODEL = os.environ.get("DEFAULT_LLM_MODEL", "llama3.2:3b")
+# Best available now: llama3.1:8b
+# Recommended upgrade: qwen2.5:7b
+# Best multilingual choice: qwen3:8b (if hardware can run it)
+DEFAULT_LLM_MODEL = os.environ.get("DEFAULT_LLM_MODEL", "llama3.1:8b")
 MAX_RESPONSE_TOKENS = int(os.environ.get("ANALYSIS_MAX_RESPONSE_TOKENS", 1000))
 
 
@@ -43,6 +46,7 @@ class AnalysisService:
         user_id: int,
         question: Optional[str] = None,
         force_regenerate: bool = False,
+        preferred_language: Optional[str] = None,
     ) -> dict:
         """
         Analyze document and generate analysis.
@@ -60,6 +64,8 @@ class AnalysisService:
             user_id: User ID (for authorization)
             question: User question (for QA)
             force_regenerate: Force regeneration, bypass cache
+            preferred_language: User's UI language code (e.g., 'en', 'te', 'de').
+                If set, the language is mandatory for the LLM response.
 
         Returns:
             Analysis result dict
@@ -147,8 +153,11 @@ class AnalysisService:
                 question=sanitized_question,
             )
 
-            # 9. Get system prompt (includes injection defense instructions)
-            system_prompt = self.prompt_builder.get_system_prompt(analysis_type)
+            # 9. Get system prompt (includes injection defense + mandatory language)
+            system_prompt = self.prompt_builder.get_system_prompt(
+                analysis_type,
+                preferred_language=preferred_language or "",
+            )
 
             # 10. Call LLM
             logger.info(f"Generating analysis: document={document_id}, type={analysis_type}, model={self.default_model}")
@@ -270,6 +279,7 @@ class AnalysisService:
         question: Optional[str] = None,
         force_regenerate: bool = False,
         request=None,
+        preferred_language: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
         """
         Stream analysis response as SSE events.
@@ -290,6 +300,8 @@ class AnalysisService:
             question: User question (for QA)
             force_regenerate: Force regeneration, bypass cache
             request: FastAPI Request object (for client disconnect detection)
+            preferred_language: User's UI language code (e.g., 'en', 'te', 'de').
+                If set, the language is mandatory for the streamed response.
 
         Yields:
             SSE-formatted strings
@@ -379,8 +391,11 @@ class AnalysisService:
                 question=sanitized_question,
             )
 
-            # 9. Get system prompt (includes injection defense instructions)
-            system_prompt = self.prompt_builder.get_system_prompt(analysis_type)
+            # 9. Get system prompt (includes injection defense + mandatory language)
+            system_prompt = self.prompt_builder.get_system_prompt(
+                analysis_type,
+                preferred_language=preferred_language or "",
+            )
 
             # 10. Call LLM with streaming
             logger.info(f"Generating streaming analysis: document={document_id}, type={analysis_type}, model={self.default_model}")

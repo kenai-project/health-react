@@ -269,27 +269,27 @@ export const llmService = {
     return fetchAPI('/llm/health');
   },
 
-  chat: async (message, history = []) => {
+  chat: async (message, history = [], language = null) => {
     return fetchAPI('/llm/chat', {
       method: 'POST',
       headers: getJsonHeaders(),
-      body: JSON.stringify({ message, history })
+      body: JSON.stringify({ message, history, language })
     });
   },
 
-  analyze: async (limit = 10) => {
+  analyze: async (limit = 10, language = null) => {
     return fetchAPI('/llm/analyze', {
       method: 'POST',
       headers: getJsonHeaders(),
-      body: JSON.stringify({ limit })
+      body: JSON.stringify({ limit, language })
     });
   },
 
-  suggestions: async (limit = 10) => {
+  suggestions: async (limit = 10, language = null) => {
     return fetchAPI('/llm/suggestions', {
       method: 'POST',
       headers: getJsonHeaders(),
-      body: JSON.stringify({ limit })
+      body: JSON.stringify({ limit, language })
     });
   }
 };
@@ -336,26 +336,28 @@ export const documentService = {
     return fetchAPI(`/api/v1/documents/${id}`, { method: 'DELETE' });
   },
 
-  // Analysis API
-  generateSummary: async (documentId) => {
-    return fetchAPI(`/api/v1/documents/${documentId}/summary`, {
+// Analysis API
+  generateSummary: async (documentId, language = null) => {
+    const qs = language ? `?language=${encodeURIComponent(language)}` : '';
+    return fetchAPI(`/api/v1/documents/${documentId}/summary${qs}`, {
       method: 'POST',
       headers: getJsonHeaders(),
     });
   },
 
-  generateExplanation: async (documentId) => {
-    return fetchAPI(`/api/v1/documents/${documentId}/explanation`, {
+  generateExplanation: async (documentId, language = null) => {
+    const qs = language ? `?language=${encodeURIComponent(language)}` : '';
+    return fetchAPI(`/api/v1/documents/${documentId}/explanation${qs}`, {
       method: 'POST',
       headers: getJsonHeaders(),
     });
   },
 
-  askQuestion: async (documentId, question) => {
+  askQuestion: async (documentId, question, language = null) => {
     return fetchAPI(`/api/v1/documents/${documentId}/question`, {
       method: 'POST',
       headers: getJsonHeaders(),
-      body: JSON.stringify({ question })
+      body: JSON.stringify({ question, language })
     });
   },
 
@@ -377,16 +379,18 @@ export const documentService = {
     });
   },
 
-  // Streaming Analysis API (SSE)
-  generateSummaryStream: (documentId, onEvent, signal) => {
-    return _streamAnalysis(`/api/v1/documents/${documentId}/summary/stream`, null, onEvent, signal);
+// Streaming Analysis API (SSE)
+  generateSummaryStream: (documentId, onEvent, signal, language = null) => {
+    const qs = language ? `?language=${encodeURIComponent(language)}` : '';
+    return _streamAnalysis(`/api/v1/documents/${documentId}/summary/stream${qs}`, null, onEvent, signal);
   },
 
-  generateExplanationStream: (documentId, onEvent, signal) => {
-    return _streamAnalysis(`/api/v1/documents/${documentId}/explanation/stream`, null, onEvent, signal);
+  generateExplanationStream: (documentId, onEvent, signal, language = null) => {
+    const qs = language ? `?language=${encodeURIComponent(language)}` : '';
+    return _streamAnalysis(`/api/v1/documents/${documentId}/explanation/stream${qs}`, null, onEvent, signal);
   },
 
-  askQuestionStream: (documentId, question, onEvent, signal) => {
-    return _streamAnalysis(`/api/v1/documents/${documentId}/question/stream`, { question }, onEvent, signal);
+  askQuestionStream: (documentId, question, onEvent, signal, language = null) => {
+    return _streamAnalysis(`/api/v1/documents/${documentId}/question/stream`, { question, language }, onEvent, signal);
   }
 };

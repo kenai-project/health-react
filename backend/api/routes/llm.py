@@ -20,14 +20,17 @@ def _get_service() -> LLMService:
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1)
     history: Optional[List[dict]] = None
+    language: Optional[str] = Field(default=None, max_length=10)
 
 
 class AnalyzeRequest(BaseModel):
     limit: int = Field(default=10, ge=1, le=20)
+    language: Optional[str] = Field(default=None, max_length=10)
 
 
 class SuggestionsRequest(BaseModel):
     limit: int = Field(default=10, ge=1, le=20)
+    language: Optional[str] = Field(default=None, max_length=10)
 
 
 class HealthResponse(BaseModel):
@@ -83,6 +86,7 @@ def chat(req: ChatRequest, current_user=Depends(get_current_user)):
             message=message,
             history=validated_history,
             health_context=health_context,
+            preferred_language=req.language,
         )
         return ChatResponse(**result)
     except HTTPException:
@@ -99,7 +103,10 @@ def chat(req: ChatRequest, current_user=Depends(get_current_user)):
 def analyze(req: AnalyzeRequest, current_user=Depends(get_current_user)):
     try:
         health_context = _build_health_context(current_user, limit=req.limit)
-        result = _get_service().analyze(health_context=health_context)
+        result = _get_service().analyze(
+            health_context=health_context,
+            preferred_language=req.language,
+        )
         return AnalysisResponse(**result)
     except HTTPException:
         raise
@@ -115,7 +122,10 @@ def analyze(req: AnalyzeRequest, current_user=Depends(get_current_user)):
 def suggestions(req: SuggestionsRequest, current_user=Depends(get_current_user)):
     try:
         health_context = _build_health_context(current_user, limit=req.limit)
-        result = _get_service().suggestions(health_context=health_context)
+        result = _get_service().suggestions(
+            health_context=health_context,
+            preferred_language=req.language,
+        )
         return SuggestionsResponse(**result)
     except HTTPException:
         raise
